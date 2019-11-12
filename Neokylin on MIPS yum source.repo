@@ -1,0 +1,20 @@
+[ns7-mips64el-os]
+name=NeoKylin Linux Advanced Server 7 - Os
+baseurl=http://download.cs2c.com.cn/neokylin/server/releases/7.0/ls_64/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-neokylin-release
+enabled=1
+
+[ns7-mips64el-extras]
+name=NeoKylin Linux Advanced Server 7 - Addons
+baseurl=http://download.cs2c.com.cn/neokylin/server/everything/7.0/ls_64/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-neokylin-release
+enabled=0
+
+[ns7-mips64el-updates]
+name=NeoKylin Linux Advanced Server 7 - Updates
+baseurl=http://download.cs2c.com.cn/neokylin/server/updates/7.0/ls_64/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-neokylin-release
+enabled=0
