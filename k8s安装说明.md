@@ -90,6 +90,14 @@ kubectl apply -f kube-flannel.yml
 
 # 一步生成 join 命令
 kubeadm token create --print-join-command
+
+
+# 让 master 也做 node (可以调度 pod 到该节点)
+kubectl taint node master node-role.kubernetes.io/master-
+# 让 master 只做 master (不调度 pod 到该节点)
+kubectl taint node master node-role.kubernetes.io/master="":NoSchedule
+
+
 ```
 
 ## node
@@ -98,4 +106,10 @@ kubeadm token create --print-join-command
 # 执行 master 节点 init 生成的最后一行
 # 或者执行 master 一步生成的 join 命令
 kubeadm join <master-ip>:<master-port> --token <token> --discovery-token-ca-cert-hash sha256:<hash>
+```
+
+##  for test
+``` bash
+kubectl run --image=nginx:alpine nginx-app --port=80
+kubectl expose deployment nginx-app --port=80 --target-port=80 --type=NodePort
 ```
