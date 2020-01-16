@@ -10,13 +10,13 @@
 
 ### etcd
 
-![独立 etcd](./搭建高可用的k8s集群/etcd01.png)
+![独立 etcd](./images/搭建高可用的k8s集群/etcd01.png)
 一是使用独立的 etcd 集群，使用 3 台或者 5 台服务器只运行 etcd，独立维护和升级。甚至可以使用 CoreOS 的 update-engine 和 locksmith，让服务器完全自主的完成升级。这个 etcd 集群将作为基石用于构建整个集群。 采用这项策略的主要动机是 etcd 集群的节点增减都需要显式的通知集群，保证 etcd 集群节点稳定可以更方便的用程序完成集群滚动升级，减轻维护负担。
 
-![k8s etcd](./搭建高可用的k8s集群/etcd02.png)
+![k8s etcd](./images/搭建高可用的k8s集群/etcd02.png)
 二是在 Kubernetes Master 上用 static pod 的形式来运行 etcd，并将多台 Kubernetes Master 上的 etcd 组成集群。 在这一模式下，各个服务器的 etcd 实例被注册进了 Kubernetes 当中，虽然无法直接使用 kubectl 来管理这部分实例，但是监控以及日志搜集组件均可正常工作。在这一模式运行下的 etcd 可管理性更强。
 
-![self-hosted etcd](./搭建高可用的k8s集群/etcd03.png)
+![self-hosted etcd](./images/搭建高可用的k8s集群/etcd03.png)
 三是使用 CoreOS 提出的 self-hosted etcd 方案，将本应在底层为 Kubernetes 提供服务的 etcd 运行在 Kubernetes 之上。 实现 Kubernetes 对自身依赖组件的管理。在这一模式下的 etcd 集群可以直接使用 etcd-operator 来自动化运维，最符合 Kubernetes 的使用习惯。
 
 ### apiserver
