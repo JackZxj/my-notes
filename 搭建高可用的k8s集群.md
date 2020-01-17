@@ -85,15 +85,15 @@ listen stats
 
 frontend kube-apiserver-https
   mode tcp
-  bind :8443        # 负载平衡的端口
+  bind :8443                              # 负载平衡的端口
   default_backend kube-apiserver-backend
 
 backend kube-apiserver-backend
   mode tcp
   balance roundrobin
-  server apiserver1 192.168.154.10:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master1 的ip
-  server apiserver2 192.168.154.11:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master2 的ip
-  server apiserver3 192.168.154.12:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master3 的ip
+  server apiserver1 10.164.17.53:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master1 的ip
+  server apiserver2 10.164.17.59:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master2 的ip
+  server apiserver3 10.164.17.60:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master3 的ip
 EOF
 
 # haproxy & keeplived yaml
@@ -147,11 +147,11 @@ spec:
     image: docker.io/osixia/keepalived:2.0.19
     env:
     - name: KEEPALIVED_VIRTUAL_IPS
-      value: 192.168.154.100        # 浮动 ip， 用于多 master 高可用
+      value: 10.164.17.100        # 浮动 ip， 用于多 master 高可用
     - name: KEEPALIVED_INTERFACE
       value: ens33
     - name: KEEPALIVED_UNICAST_PEERS
-      value: "#PYTHON2BASH:['192.168.154.10', '192.168.154.11', '192.168.154.12']"     # master 节点列表
+      value: "#PYTHON2BASH:['10.164.17.53', '10.164.17.59', '10.164.17.60']"     # master 节点列表
     - name: KEEPALIVED_PASSWORD
       value: docker
     - name: KEEPALIVED_PRIORITY
