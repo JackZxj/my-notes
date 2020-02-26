@@ -51,8 +51,8 @@ env：
 
 ``` bash
 # haproxy configuration
-mkdir -p /etc/haproxy
-cat > /etc/haproxy/haproxy.cfg << EOF
+mkdir -p /etc/kubernetes
+cat > /etc/kubernetes/kube-haproxy.cfg << EOF
 global
   log 127.0.0.1 local0 err
   maxconn 50000
@@ -85,20 +85,20 @@ listen stats
 
 frontend kube-apiserver-https
   mode tcp
-  bind :8443                              # 负载平衡的端口
+  bind :6443                              # 负载平衡的端口
   default_backend kube-apiserver-backend
 
 backend kube-apiserver-backend
   mode tcp
   balance roundrobin
-  server apiserver1 10.164.17.53:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master1 的ip
-  server apiserver2 10.164.17.59:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master2 的ip
-  server apiserver3 10.164.17.60:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master3 的ip
+  server apiserver1 192.168.122.44:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master1 的ip
+  server apiserver2 192.168.122.208:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master2 的ip
+  server apiserver3 192.168.122.175:6443 weight 3 minconn 100 maxconn 50000 check inter 5000 rise 2 fall 5     # ip 要改为 master3 的ip
 EOF
 
 # haproxy & keeplived yaml
 mkdir -p /etc/kubernetes/manifests
-cat > /etc/kubernetes/manifests/haproxy.yaml << EOF
+cat > /etc/kubernetes/manifests/kube-haproxy.yaml << EOF
 apiVersion: v1
 kind: Pod
 metadata:
@@ -125,10 +125,10 @@ spec:
   volumes:
   - name: haproxy-cfg
     hostPath:
-      path: /etc/haproxy/haproxy.cfg
+      path: /etc/kubernetes/kube-haproxy.cfg
 EOF
 
-cat > /etc/kubernetes/manifests/keepalived.yaml << EOF
+cat > /etc/kubernetes/manifests/kube-keepalived.yaml << EOF
 apiVersion: v1
 kind: Pod
 metadata:
@@ -147,11 +147,11 @@ spec:
     image: docker.io/osixia/keepalived:2.0.19
     env:
     - name: KEEPALIVED_VIRTUAL_IPS
-      value: 10.164.17.100        # 浮动 ip， 用于多 master 高可用
+      value: 192.168.122.100        # 浮动 ip， 用于多 master 高可用
     - name: KEEPALIVED_INTERFACE
-      value: ens33
+      value: ens33                  # 应该修改为几台master之间用于通信的网卡名
     - name: KEEPALIVED_UNICAST_PEERS
-      value: "#PYTHON2BASH:['10.164.17.53', '10.164.17.59', '10.164.17.60']"     # master 节点列表
+      value: "#PYTHON2BASH:['192.168.122.44','192.168.122.208','192.168.122.175']"     # master 节点列表
     - name: KEEPALIVED_PASSWORD
       value: docker
     - name: KEEPALIVED_PRIORITY
@@ -167,6 +167,7 @@ spec:
         add:
         - NET_ADMIN
 EOF
+
 ```
 
 ### Master1
@@ -175,7 +176,8 @@ EOF
 cat > kube-init.yaml << EOF
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
-controlPlaneEndpoint: "10.164.17.100:8443"                    # master 负载平衡 ip，就是上面的浮动 ip + haproxy 的端口
+kubernetesVersion: v1.15.3
+controlPlaneEndpoint: "10.164.17.100:6443"                    # master 负载平衡 ip，就是上面的浮动 ip + haproxy 的端口
 apiServer:
   extraArgs:
     authorization-mode: "Node,RBAC"
@@ -188,7 +190,7 @@ imageRepository: "registry.aliyuncs.com/google_containers"      # 安装镜像�
 EOF
 
 # init master
-kubeadm init --config k8s-init.yaml --upload-certs
+kubeadm init --config kube-init.yaml --upload-certs
 ```
 ``` text
 ···
@@ -225,16 +227,20 @@ kubeadm join 10.164.17.100:8443 --token tyrs3f.d3z2gd231sj21nck \
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# 在第一个master上使用如下命令生成加入新master所需的证书密钥（生成中附带了一些说明，只需取最后一行的hash值即可）
+kubeadm init phase upload-certs --upload-certs > join-k8s-master-certificate-key.txt
+
+# 生成加master的指令
+echo `kubeadm token create --print-join-command` --control-plane --certificate-key `tail -n 1 join-k8s-master-certificate-key.txt` --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests
+
 ```
 
 ### Other master
 
 ``` bash
 # join master1
-kubeadm join 10.164.17.100:8443 --token tyrs3f.d3z2gd231sj21nck \
-  --discovery-token-ca-cert-hash sha256:00c26bf8352ffc6094ac93a2230ab5d13b49c038792ff1f74d6f1417dae0c7ba \
-  --control-plane --certificate-key 2e0a4b8b9c96625e62d94f7784b5a5cf8f2256eed707377b5208931284046eff \
-  --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests
+kubeadm join 192.168.122.100:6443 --token ohf0yg.zk0nrhrldxmwh272 --discovery-token-ca-cert-hash sha256:747c214cf08d35f51a303255382c47eaf77639e01ca0d60cf64ab937a7dc14b9 --control-plane --certificate-key 33dd2e73ebecd24ab82423c8449bb7541dc2881bd45d22676fb3b9a35c3c4f17 --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests
 
 # After success
 mkdir -p $HOME/.kube
