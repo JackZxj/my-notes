@@ -231,6 +231,42 @@ kubeadm version
 kubectl version
 kubelet --version
 kubectl get no
+
+# ----------------------------------------------------
+
+# k8s v1.17.0
+docker pull gcr.azk8s.cn/google_containers/kube-apiserver-arm64:v1.17.0
+docker pull gcr.azk8s.cn/google_containers/kube-controller-manager-arm64:v1.17.0
+docker pull gcr.azk8s.cn/google_containers/kube-scheduler-arm64:v1.17.0
+docker pull gcr.azk8s.cn/google_containers/kube-proxy-arm64:v1.17.0
+docker pull gcr.azk8s.cn/google_containers/pause-arm64:3.1
+docker pull gcr.azk8s.cn/google_containers/etcd-arm64:3.4.3-0
+docker pull gcr.azk8s.cn/google_containers/coredns:1.6.5
+
+docker tag gcr.azk8s.cn/google_containers/kube-apiserver-arm64:v1.17.0 k8s.gcr.io/kube-apiserver:v1.17.0
+docker tag gcr.azk8s.cn/google_containers/kube-controller-manager-arm64:v1.17.0 k8s.gcr.io/kube-controller-manager:v1.17.0
+docker tag gcr.azk8s.cn/google_containers/kube-scheduler-arm64:v1.17.0 k8s.gcr.io/kube-scheduler:v1.17.0
+docker tag gcr.azk8s.cn/google_containers/kube-proxy-arm64:v1.17.0 k8s.gcr.io/kube-proxy:v1.17.0
+docker tag gcr.azk8s.cn/google_containers/pause-arm64:3.1 k8s.gcr.io/pause:3.1
+docker tag gcr.azk8s.cn/google_containers/etcd-arm64:3.4.3-0 k8s.gcr.io/etcd:3.4.3-0
+docker tag gcr.azk8s.cn/google_containers/coredns:1.6.5 k8s.gcr.io/coredns:1.6.5
+
+# upgrade cluster
+kubeadm upgrade apply v1.17.0
+# upgrade without updating certificate
+# kubeadm upgrade apply v1.17.0 --certificate-renewal=false
+
+# upgrade kubelet & kubectl
+apt-get install kubelet=1.17.0-00 kubectl=1.17.0-00
+
+# reboot kubelet
+systemctl daemon-reload && systemctl restart kubelet
+
+# check
+kubeadm version
+kubectl version
+kubelet --version
+kubectl get no
 ```
 
 ## degrade
