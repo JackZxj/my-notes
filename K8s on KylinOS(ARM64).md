@@ -272,3 +272,10 @@ kubectl get no
 ## degrade
 
 It's as same as in upgrade. `kubeadm upgrade` can also be used to degrade a cluster.
+
+And similarly, kubeadm does not support cross-version degrading.
+
+**NOTE:** when you degrade your k8s cluster, the `CoreDNS` component will not degrade as other component.
+``` bash
+# TO BE CONTINUE
+```
