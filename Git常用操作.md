@@ -12,16 +12,22 @@ git branch -a    # 显示所有分支
 git checkout [-b] <branchName>    # (-b表示如果不存在则创建)切换到branchName分支
 git checkout -b <localBranch> <origin/originBranch>    # 切换到远程分支
 
-git fetch <远程主机名>    # 这个命令将某个远程主机的更新全部取回本地
+git fetch <orginName>    # 这个命令将某个远程主机的更新全部取回本地
 git fetch origin <branchName>    # 从远程主机的branchName分支拉取最新内容 
 git log -p FETCH_HEAD    # 查看拉下来的分支与当前分支的区别
 git merge FETCH_HEAD    # 将拉取下来的最新内容合并到当前所在的分支中
 # pull = fetch + merge
 git pull <orginName> <originBranch>:<localBranch>    # 将远程分支与本地分支合并
 
+git log    # 查看 commit 日志
+git reset --hard <commit_id>    # 如果只是本地 commit 还没有提交到远程仓库，可以使用 reset 来取消一些错误的 commit, 若回退到的版本老于远程库，则需要使用 git push -f 强制推送
+git revert -n <commit_id>    # 相当于提交一个新的 commit， commit的内容是反做 commit_id 提交的改动
+# 可以看看这个关于高级合并的说明： https://git-scm.com/book/zh/v2/Git-%E5%B7%A5%E5%85%B7-%E9%AB%98%E7%BA%A7%E5%90%88%E5%B9%B6
+
+git push <orginName> <localBranch>:<originBranch>    # 将本地分支推送到源，若 localBranch 为空，则删除远程 originBranch
 ```
 
-```mermaid
+``` mermaid
 graph LR
 A[Remote] -->|fetch/clone| B[Repository]
 B -->|push| A
