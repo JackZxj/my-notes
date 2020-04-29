@@ -12,6 +12,10 @@ git branch -a    # 显示所有分支
 git checkout [-b] <branchName>    # (-b表示如果不存在则创建)切换到branchName分支
 git checkout -b <localBranch> <origin/originBranch>    # 切换到远程分支
 
+# git checkout -b <dev_new> <otherOrigin/otherOriginBranch>
+# 报错：不能同时更新路径并切换到分支'dev_new'
+# 可能是没有把远程更新到本地，需要运行 git fetch otherOrigin 然后再重新运行
+
 git fetch <orginName>    # 这个命令将某个远程主机的更新全部取回本地
 git fetch origin <branchName>    # 从远程主机的branchName分支拉取最新内容 
 git log -p FETCH_HEAD    # 查看拉下来的分支与当前分支的区别
