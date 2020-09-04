@@ -53,6 +53,8 @@ EOF
 
 # 安装最新版
 yum install -y kubelet kubeadm kubectl
+# 查看可用版本
+# yum search --showduplicates kubeadm
 # 安装指定版本
 # yum install -y kubelet-1.15.0 kubeadm-1.15.0 kubectl-1.15.0
 
@@ -96,8 +98,6 @@ kubeadm token create --print-join-command
 kubectl taint node master node-role.kubernetes.io/master-
 # 让 master 只做 master (不调度 pod 到该节点)
 kubectl taint node master node-role.kubernetes.io/master="":NoSchedule
-
-
 ```
 
 ## node

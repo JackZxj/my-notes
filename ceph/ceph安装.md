@@ -1,23 +1,21 @@
 # Ceph 安装
 
-----------------------------------------------
-
 ## Background
 
 安装环境：
-- CentOS 7.4
+
+* CentOS 7.4
 
 安装节点为
-- 192.168.154.3 (monitor, node0) 名称为 master
-- 192.168.154.4 (node1) 名称为 node-1
-- 192.168.154.5 (node2) 名称为 node-2
+
+* 192.168.154.3 (monitor, node0) 名称为 master
+* 192.168.154.4 (node1) 名称为 node-1
+* 192.168.154.5 (node2) 名称为 node-2
 
 修改方式见k8s安装，修改 3 台主机的 /etc/hosts 文件，末尾加入
 192.168.154.3 master
 192.168.154.4 node-1
 192.168.154.5 node-2
-
------------------------------------------
 
 ## Prepare
 
@@ -66,7 +64,6 @@ $ setenforce 0
 $ sed -i '/^SELINUX=/cSELINUX=disabled' /etc/selinux/config
 ```
 
----------------------------
 ### 安装时间同步服务
 
 ``` bash
@@ -129,8 +126,6 @@ $ systemctl enable ntpd && systemctl restart ntpd
 
 **[说明](https://blog.csdn.net/cx55887/article/details/83868660)**: 在工作中我们一般都是使用ntpdate+ntp来完成时间同步，因为单独使用ntpdate同步时间虽然简单快捷但是会导致时间不连续，而时间不连续在数据库业务中影响是很大的，单独使用ntp做时间同步时，当服务器与时间服务器相差大的时候则无法启动ntpd来同步时间。由于ntpd做时间同步时是做的顺滑同步（可以简单理解为时间走得快，以便将落后的时间赶过来），所以同步到时间服务器的的时间不是瞬间完成的，开启ntpd之后稍等三五分钟就能完成时间同步。
 
------------------------------------
-
 ### 创建 cephdeploy 用户，配置其免密 sudo
 
 ``` bash
@@ -141,8 +136,6 @@ $ echo "cephdeploy ALL = (root) NOPASSWD:ALL" | tee /etc/sudoers.d/cephdeploy
 $ chmod 0440 /etc/sudoers.d/cephdeploy
 ```
 
-----------------------------------
-
 ### master 节点 ssh 免密连接 node
 
 ``` bash
@@ -150,8 +143,6 @@ $ ssh-keygen
 $ ssh-copy-id node-1
 $ ssh-copy-id node-2
 ```
-
------------------------------------
 
 ## 安装 ceph
 
@@ -189,7 +180,7 @@ $ ceph -s
 
 ## 可能的错误
 
-- **`ceph-deploy new node-2` 错误**
+* ** `ceph-deploy new node-2` 错误**
 
 ``` bash
 # 由于网络问题可能会失败，比如遇到下面的情况
@@ -220,23 +211,23 @@ $ ceph -s
 
 **解决方案：**
 
-此时可以尝试在出错的节点上手动安装错误的那个包 `yum install -y ceph`, 然后再在 master 上单独执行安装程序 `ceph-deploy install node-2`
-
+此时可以尝试在出错的节点上手动安装错误的那个包 `yum install -y ceph` , 然后再在 master 上单独执行安装程序 `ceph-deploy install node-2`
 或者将所需的 rpm 包下载到本地后配置本地 yum 源安装。
 
 PS：ceph 长时间下载失败时，可能会被自动替换为官方的源，如果被改了的话，记得自己得改回国内的源
 
-- **`ceph –s` 查看 ceph 情况时报错 `error connecting to the cluster`**
+* ** `ceph –s` 查看 ceph 情况时报错 `error connecting to the cluster` **
 
 **解决方案：**
 
-查看节点的 `/etc/ceph/` 目录下是否包含 `ceph.client.admin.keyring` `ceph.conf` 两个文件，如果没有的话需要将 master 生成的这两个文件拷贝进去
+查看节点的 `/etc/ceph/` 目录下是否包含 `ceph.client.admin.keyring`  `ceph.conf` 两个文件，如果没有的话需要将 master 生成的这两个文件拷贝进去
 
-- **`ceph –s` 查看 ceph 情况时报错 `HEALTH_WARN clock skew detected on mon.nodexxx`**
+* **`ceph –s` 查看 ceph 情况时报错 `HEALTH_WARN clock skew detected on mon.nodexxx`**
 
 **解决方案：**
 
 要做的是，修改ceph配置中的时间偏差阈值，那么，在admin节点：
+
 ``` bash
 vi /root/cluster/ceph.conf
 添加两个字段

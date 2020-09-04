@@ -85,7 +85,7 @@ listen stats
 
 frontend kube-apiserver-https
   mode tcp
-  bind :6443                              # 负载平衡的端口
+  bind :8443                              # 负载平衡的端口
   default_backend kube-apiserver-backend
 
 backend kube-apiserver-backend
@@ -177,7 +177,7 @@ cat > kube-init.yaml << EOF
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 kubernetesVersion: v1.15.3
-controlPlaneEndpoint: "10.164.17.100:6443"                    # master 负载平衡 ip，就是上面的浮动 ip + haproxy 的端口
+controlPlaneEndpoint: "10.164.17.100:8443"                    # master 负载平衡 ip，就是上面的浮动 ip + haproxy 的端口
 apiServer:
   extraArgs:
     authorization-mode: "Node,RBAC"
@@ -233,14 +233,13 @@ kubeadm init phase upload-certs --upload-certs > join-k8s-master-certificate-key
 
 # 生成加master的指令
 echo `kubeadm token create --print-join-command` --control-plane --certificate-key `tail -n 1 join-k8s-master-certificate-key.txt` --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests
-
 ```
 
 ### Other master
 
 ``` bash
 # join master1
-kubeadm join 192.168.122.100:6443 --token ohf0yg.zk0nrhrldxmwh272 --discovery-token-ca-cert-hash sha256:747c214cf08d35f51a303255382c47eaf77639e01ca0d60cf64ab937a7dc14b9 --control-plane --certificate-key 33dd2e73ebecd24ab82423c8449bb7541dc2881bd45d22676fb3b9a35c3c4f17 --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests
+kubeadm join 192.168.122.100:8443 --token ohf0yg.zk0nrhrldxmwh272 --discovery-token-ca-cert-hash sha256:747c214cf08d35f51a303255382c47eaf77639e01ca0d60cf64ab937a7dc14b9 --control-plane --certificate-key 33dd2e73ebecd24ab82423c8449bb7541dc2881bd45d22676fb3b9a35c3c4f17 --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests
 
 # After success
 mkdir -p $HOME/.kube
@@ -249,7 +248,15 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
 ### Add node
+
 ``` bash
 kubeadm join 10.164.17.100:8443 --token tyrs3f.d3z2gd231sj21nck \
     --discovery-token-ca-cert-hash sha256:00c26bf8352ffc6094ac93a2230ab5d13b49c038792ff1f74d6f1417dae0c7ba 
+```
+
+## helper
+
+``` BASH
+# 删除多余的ip
+ip addr del 10.10.4.99 dev ens160
 ```

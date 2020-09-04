@@ -214,8 +214,7 @@ RxJS 本质： 一个核心 ( `Observable` ) 三个重点( `Observer` , `Subject
 ### 使用 create 创建 Observable
 
 > 建立 Observable 的方法有非常多種，其中 create 是最基本的方法。create 方法在 Rx. Observable 物件中，要傳入一個 callback function ，這個 callback function 會接收一個 observer 參數，這個 callback function 會定義 observable 將會如何發送值。
->> 雖然 Observable 可以被 `create` ，但實務上我們通常都使用 creation operator 像是 from, of, fromEvent, fromPromise 等。這裡只是為了從基本的開始講解所以才用 `create` 
-
+>> 雖然 Observable 可以被 `create` ，但實務上我們通常都使用 creation operator 像是 from, of, fromEvent, fromPromise 等。這裡只是為了從基本的開始講解所以才用 `create`
 在 [RxJS 中文网](https://cn.rx.js.org/) 中，打开开发者工具 ( `F12` ) 可以试用 RxJS
 
 ``` JS
@@ -534,7 +533,7 @@ new Promise(test).then(function(result) {
 
 > Promise还可以做更多的事情，比如，有若干个异步任务，需要先做任务1，如果成功后再做任务2，任何任务失败则不再继续并执行错误处理函数。
 > 要串行执行这样的异步任务，不用Promise需要写一层一层的嵌套代码。有了Promise，我们只需要简单地写：
-> `job1.then(job2).then(job3).catch(handleError);` 
+> `job1.then(job2).then(job3).catch(handleError);`
 > 其中，job1、job2和job3都是Promise对象。
 
 除了串行执行若干异步任务外，Promise还可以并行执行异步任务，用 `Promise.all()` 实现如下：
@@ -752,7 +751,7 @@ Rx.Observable
 #### interval, timer
 
 **interval:** 定时执行向 next 传入一个累加的数值。interval 需要传入一个以毫秒为单位的数值表示间隔。
-`public static interval(period: number, scheduler: Scheduler): Observable` 
+ `public static interval(period: number, scheduler: Scheduler): Observable`
 period: 可选，默认为 0
 scheduler: 可选，默认为 async
 
@@ -778,7 +777,7 @@ Rx.Observable
 
 **timer:** 和 interval 会定时执行向 next 传入一个累加的数值。区别在于 timer 可以控制第一个输出的延时。
 
-`public static timer(initialDelay: number | Date, period: number, scheduler: Scheduler): Observable` 
+ `public static timer(initialDelay: number | Date, period: number, scheduler: Scheduler): Observable`
 initialDelay: 必填，若只填此项，则只输出第一个值，然后执行 complete
 period: 可选，默认为 0
 scheduler: 可选，默认为 async

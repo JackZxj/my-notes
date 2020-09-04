@@ -3,13 +3,14 @@
 These steps are similar to K8s on the Raspberry Pi
 
 ## Environment
-- mechine
-  - KylinOS 4.0.2sp2-server
-  - Arch: arm64 (Phytium FT1500a)
-- Docker
-  - version 18.09.7
-- Kubernetes
-  - version 1.15.3
+
+* mechine
+  + KylinOS 4.0.2sp2-server
+  + Arch: arm64 (Phytium FT1500a)
+* Docker
+  + version 18.09.7
+* Kubernetes
+  + version 1.15.3
 
 ## preparation
 
@@ -136,7 +137,6 @@ sudo apt-mark hold kubelet=1.15.3-00 kubeadm=1.15.3-00 kubectl=1.15.3-00
 
 # self-starting on boot
 sudo systemctl enable kubelet && sudo systemctl restart kubelet
-
 ```
 
 ### master
@@ -171,10 +171,10 @@ sudo kubeadm init --pod-network-cidr=10.253.0.0/16 --kubernetes-version=v1.15.3
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
 ```
 
 ##  for test
+
 ``` bash
 kubectl run --image=nginx:alpine nginx-app --port=80
 kubectl expose deployment nginx-app --port=80 --target-port=80 --type=NodePort
@@ -182,7 +182,7 @@ kubectl expose deployment nginx-app --port=80 --target-port=80 --type=NodePort
 
 ## upgrade
 
-You can upgrade `1.X.Y` to `1.X+1.Z`, but unable to upgrade to `1.A.B(A > X+1)`.
+You can upgrade `1.X.Y` to `1.X+1.Z` , but unable to upgrade to `1.A.B(A > X+1)` .
 
 ``` bash
 # upgrade kubeadm
@@ -276,6 +276,7 @@ It's as same as in upgrade. `kubeadm upgrade` can also be used to degrade a clus
 And similarly, kubeadm does not support cross-version degrading.
 
 **NOTE:** when you degrade your k8s cluster, the `CoreDNS` component will not degrade as other component.
+
 ``` bash
 # TO BE CONTINUE
 ```

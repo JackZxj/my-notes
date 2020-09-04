@@ -1,15 +1,16 @@
 # Kubernetes on Raspberry Pi 3B
 
 ## Environment
-- mechine
-  - raspberry pi 3B * 2
-  - RAM 1GB, ROM 16GB
-  - Raspbian GNU/Linux 10 (buster)
-  - Arch: armv7l
-- Docker
-  - version 19.03.5 (The latest version as of January 15, 2020)
-- Kubernetes
-  - version 1.15.3
+
+* mechine
+  + raspberry pi 3B * 2
+  + RAM 1GB, ROM 16GB
+  + Raspbian GNU/Linux 10 (buster)
+  + Arch: armv7l
+* Docker
+  + version 19.03.5 (The latest version as of January 15, 2020)
+* Kubernetes
+  + version 1.15.3
 
 ## Steps
 
@@ -23,6 +24,7 @@ sudo passwd root
 sudo passwd --unlock root
 
 ## disable root
+
 # sudo passwd --lock root
 ```
 
@@ -54,6 +56,7 @@ sudo docker run hello-world
 ### Kubernetes
 
 #### Common Steps
+
 ``` bash
 ## disable firewalld
 # sudo ufw disable
@@ -94,10 +97,10 @@ sudo apt-mark hold kubelet=1.15.3-00 kubeadm=1.15.3-00 kubectl=1.15.3-00
 
 # self-starting on boot
 sudo systemctl enable kubelet && sudo systemctl restart kubelet
-
 ```
 
 #### Master steps
+
 ``` bash
 # get image list of k8s
 kubeadm config images list
@@ -143,6 +146,7 @@ kubeadm token create --print-join-command
 ```
 
 #### Node steps
+
 ``` bash
 # pull images
 sudo docker pull gcr.azk8s.cn/google_containers/kube-proxy-arm:v1.15.3
@@ -160,6 +164,7 @@ docker tag quay-mirror.qiniu.com/coreos/flannel:v0.11.0-arm quay.io/coreos/flann
 ```
 
 #### Test
+
 ``` bash
 kubectl run --image=arm32v7/nginx nginx-app --port=80
 kubectl expose deployment nginx-app --port=80 --target-port=80 --type=NodePort
@@ -167,6 +172,7 @@ kubectl expose deployment nginx-app --port=80 --target-port=80 --type=NodePort
 ```
 
 ### Others
+
 ``` bash
 # if you get error like this
 pi@raspberrypi:~ $ sudo apt-get update

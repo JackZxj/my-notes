@@ -7,7 +7,8 @@ Docker 支持 64 位的 CentOS 7 系统，本次安装实在虚拟机环境下�
 由于某些原因，国内使用官方 yum 源速度不是很理想，此时可以选择采用国内的 `aliyun` 或者其他国内公司提供的镜像。本次选用的是阿里的 yum 源。
 
 以下命令行均通过命令行终端执行。
-``` shell
+
+``` bash
 # 创建备份文件夹
 mkdir /etc/yum.repos.d/bak
 
@@ -24,7 +25,7 @@ sudo yum makecache fast
 
 ## 三、删除旧版本 Docker
 
-``` shell
+``` bash
 sudo yum remove docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-selinux docker-engine-selinux docker-engine
 ```
 
@@ -32,7 +33,7 @@ sudo yum remove docker docker-client docker-client-latest docker-common docker-l
 
 除了采用yum安装外还有使用脚本自动安装的方式可以安装docker。本次安装采用yum的方式（较为复杂）。
 
-``` shell
+``` bash
 # 安装依赖包
 sudo yum install -y yum-utils device-mapper-persistent-data lvm2
 
@@ -44,12 +45,11 @@ sudo yum makecache fast
 
 # 安装docker
 sudo yum install docker-ce -y
-
 ```
 
 ## 五、使用 Docker CE
 
-``` shell
+``` bash
 # 启动docker
 sudo systemctl enable docker && sudo systemctl restart docker
 
@@ -62,6 +62,7 @@ sudo systemctl enable docker && sudo systemctl restart docker
 # 测试docker正常运行
 docker run hello-world
 ```
+
 如果成功执行，则在控制台输出很多信息，中间有一句为 `Hello from Docker!` ，那么说明配置成功。
 
 ## 六、配置 Docker Hub 镜像
@@ -69,6 +70,7 @@ docker run hello-world
 Docker Hub的源拉取困难时，可以添加国内的其他服务商提供的镜像加速。建议配置两个以上的加速镜像，以防宕机。
 
 在 `/etc/docker/daemon.json` 中写入以下内容（如果文件不存在，则新建该文件）。
+
 ``` json
 {
     "registry-mirrors": [
@@ -77,8 +79,10 @@ Docker Hub的源拉取困难时，可以添加国内的其他服务商提供的�
     ]
 }
 ```
+
 之后，重启 docker 服务。
-``` shell
+
+``` bash
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 ```

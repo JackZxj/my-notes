@@ -1,6 +1,6 @@
 ## 横向流程图源码格式：
 
-```mermaid
+``` mermaid
 graph LR
 A[方形] -->B(圆角)
     B --> C{条件a}
@@ -13,7 +13,7 @@ A[方形] -->B(圆角)
 
 ## 竖向流程图源码格式：
 
-```mermaid
+``` mermaid
 graph TD
 A[方形] --> B(圆角)
     B --> C{条件a}
@@ -26,7 +26,7 @@ A[方形] --> B(圆角)
 
 ## 标准流程图源码格式：
 
-```flow
+``` flow
 st=>start: 开始框
 op=>operation: 处理框
 cond=>condition: 判断框(是或否?)
@@ -42,7 +42,7 @@ cond(no)->sub1(right)->op
 
 ## 标准流程图源码格式（横向）：
 
-```flow
+``` flow
 st=>start: 开始框
 op=>operation: 处理框
 cond=>condition: (是或否?)
@@ -58,7 +58,7 @@ cond(no)->sub1(right)->op
 
 ## UML时序图源码样例：
 
-```sequence
+``` sequence
 对象A->对象B: 对象B你好吗?（请求）
 Note right of 对象B: 对象B的描述
 Note left of 对象A: 对象A的描述(提示)
@@ -70,7 +70,7 @@ Note left of 对象A: 对象A的描述(提示)
 
 ## UML时序图源码复杂样例：
 
-```sequence
+``` sequence
 Title: 标题：复杂使用
 对象A->对象B: 对象B你好吗?（请求）
 Note right of 对象B: 对象B的描述
@@ -88,7 +88,7 @@ Note right of C: 没人陪我玩
 
 ## UML标准时序图样例：
 
-```mermaid
+``` mermaid
 %% 时序图例子,-> 直线，-->虚线，->>实线箭头
   sequenceDiagram
     participant 张三
@@ -107,7 +107,7 @@ Note right of C: 没人陪我玩
 
 ## 甘特图样例：
 
-```mermaid
+``` mermaid
         gantt
         dateFormat  YYYY-MM-DD
         title 软件开发甘特图
