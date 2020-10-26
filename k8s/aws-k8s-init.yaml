@@ -1,0 +1,162 @@
+# 实例：AWS EC2
+# 公网IP：34.211.134.130
+# 内网IP：172.31.20.161
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+nodeRegistration:
+  kubeletExtraArgs:
+    node-ip: "34.211.134.130"
+localAPIEndpoint:
+  advertiseAddress: "34.211.134.130"        # 如果集群只在内网使用，则填此项为内网IP，如需外网访问，填写公网IP
+  bindPort: 6443
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+etcd:
+  local:
+    imageRepository: "172.31.20.161:5000/k8simage"      # etcd镜像的地址。如果不是镜像部署的话不用填也可以
+    #imageTag: "3.2.24"
+    dataDir: "/var/lib/etcd"      # etcd默认数据存储地址，建议不要改                      
+    extraArgs:                    # etcd启动参数
+      name: "master-01"                                                             # 节点名称，建议设为hostname
+      listen-client-urls: "https://127.0.0.1:2379,https://172.31.20.161:2379"       # 监听apiserver访问本节点etcd的地址，第二项需改为内网IP
+      advertise-client-urls: "https://172.31.20.161:2379"                           # 用于通知其他节点本节点的所包含的客户端地址，需改为内网IP
+      listen-peer-urls: "https://172.31.20.161:2380"                                # 本节点与其他节点进行数据交换(选举，数据同步)的监听地址，需改为内网IP
+      initial-advertise-peer-urls: "https://172.31.20.161:2380"                     # 告知其他集群节点访问哪个URL来与本节点数据交换
+      initial-cluster: "master-01=https://172.31.20.161:2380"                       # 集群所有节点配置，注意名称要和上面的name对应
+    serverCertSANs:    # ServerCertSANs sets extra Subject Alternative Names for the etcd server signing cert.
+    - "34.211.134.130"
+    - "172.31.20.161"
+    peerCertSANs:      # PeerCertSANs sets extra Subject Alternative Names for the etcd peer signing cert.
+    - "172.31.20.161"
+networking:
+  serviceSubnet: "10.96.0.0/12"
+  podSubnet: "10.253.0.0/16"        # 修改为目标网络插件的地址
+  dnsDomain: "cluster.local" 
+kubernetesVersion: "v1.15.3"
+apiServer:
+  extraArgs:
+    authorization-mode: "Node,RBAC"
+  timeoutForControlPlane: 4m0s
+controllerManager: {}
+dns:
+  type: CoreDNS
+scheduler: {}
+certificatesDir: /etc/kubernetes/pki
+imageRepository: "172.31.20.161:5000/k8simage"      # 安装镜像仓库的地址
+clusterName: "kubernetes"
+
+
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+bootstrapTokens:
+- groups:
+  - system:bootstrappers:kubeadm:default-node-token
+  token: abcdef.0123456789abcdef
+  ttl: 24h0m0s
+  usages:
+  - signing
+  - authentication
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 1.2.3.4
+  bindPort: 6443
+nodeRegistration:
+  criSocket: /var/run/dockershim.sock
+  name: 172.31.20.161
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+---
+apiServer:
+  timeoutForControlPlane: 4m0s
+apiVersion: kubeadm.k8s.io/v1beta2
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controllerManager: {}
+dns:
+  type: CoreDNS
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+imageRepository: k8s.gcr.io
+kind: ClusterConfiguration
+kubernetesVersion: v1.15.0
+networking:
+  dnsDomain: cluster.local
+  serviceSubnet: 10.96.0.0/12
+scheduler: {}
+---
+address: 0.0.0.0
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    cacheTTL: 2m0s
+    enabled: true
+  x509:
+    clientCAFile: /etc/kubernetes/pki/ca.crt
+authorization:
+  mode: Webhook
+  webhook:
+    cacheAuthorizedTTL: 5m0s
+    cacheUnauthorizedTTL: 30s
+cgroupDriver: cgroupfs
+cgroupsPerQOS: true
+clusterDNS:
+- 10.96.0.10
+clusterDomain: cluster.local
+configMapAndSecretChangeDetectionStrategy: Watch
+containerLogMaxFiles: 5
+containerLogMaxSize: 10Mi
+contentType: application/vnd.kubernetes.protobuf
+cpuCFSQuota: true
+cpuCFSQuotaPeriod: 100ms
+cpuManagerPolicy: none
+cpuManagerReconcilePeriod: 10s
+enableControllerAttachDetach: true
+enableDebuggingHandlers: true
+enforceNodeAllocatable:
+- pods
+eventBurst: 10
+eventRecordQPS: 5
+evictionHard:
+  imagefs.available: 15%
+  memory.available: 100Mi
+  nodefs.available: 10%
+  nodefs.inodesFree: 5%
+evictionPressureTransitionPeriod: 5m0s
+failSwapOn: true
+fileCheckFrequency: 20s
+hairpinMode: promiscuous-bridge
+healthzBindAddress: 127.0.0.1
+healthzPort: 10248
+httpCheckFrequency: 20s
+imageGCHighThresholdPercent: 85
+imageGCLowThresholdPercent: 80
+imageMinimumGCAge: 2m0s
+iptablesDropBit: 15
+iptablesMasqueradeBit: 14
+kind: KubeletConfiguration
+kubeAPIBurst: 10
+kubeAPIQPS: 5
+makeIPTablesUtilChains: true
+maxOpenFiles: 1000000
+maxPods: 110
+nodeLeaseDurationSeconds: 40
+nodeStatusReportFrequency: 1m0s
+nodeStatusUpdateFrequency: 10s
+oomScoreAdj: -999
+podPidsLimit: -1
+port: 10250
+registryBurst: 10
+registryPullQPS: 5
+resolvConf: /etc/resolv.conf
+rotateCertificates: true
+runtimeRequestTimeout: 2m0s
+serializeImagePulls: true
+staticPodPath: /etc/kubernetes/manifests
+streamingConnectionIdleTimeout: 4h0m0s
+syncFrequency: 1m0s
+volumeStatsAggPeriod: 1m0s
