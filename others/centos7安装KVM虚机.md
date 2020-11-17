@@ -80,6 +80,9 @@ virsh console VM_NAME
 要创建快照，raw格式不支持。。。
 
 ``` BASH
+# 查看虚机磁盘信息
+qemu-img info c1-0.img
+
 # raw格式转qcow2
 # qemu-img convert -f raw -O qcow2 <原文件名> <新文件名>
 qemu-img convert -f raw -O qcow2 c1-0.img centos78-0.qcow2
