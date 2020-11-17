@@ -45,6 +45,7 @@ NATS是一个**简单**，**安全**，**高性能**的开源消息队列系统�
 * （可选）订阅主题和设置处理程序以处理消息。
 * （可选）发布消息。
 * 完成后，客户端将与NATS服务端断开连接。
+
 ![订阅模式](https://github.com/JackZxj/my-notes/blob/master/images/NATS%20introduction/02.png)
 
 ## NATS Subjects
