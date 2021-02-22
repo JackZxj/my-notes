@@ -44,32 +44,46 @@ virt-install --virt-type=kvm \
 
 ``` BASH
 # 复制虚机
-virt-clone -o centos74 -n cent_xiang -f /home/cent_xiang.qcow2
+# 关闭源虚机
+# virt-clone --original centos6.5 --name centos6.5_new --file /home/images/centos6.5_new.img
+virt-clone -o centos78-0 -n centos78-edge-0 -f /kvm/vm-centos78-edge-0.qcow2
+# 修改新虚机的内存/cpu等配置
+virsh edit centos78-edge-0
+# 开机
+uuidgen
+# 复制的centos可能inet6地址重复，需要更新一个uuid
+vi /etc/sysconfig/network-scripts/ifcfg-eth0
+# 重启网络
+service network restart
+# 修改hostname
+vi /etc/hostname
+# 重启
+reboot now
 
 # 列出所有虚机
 virsh list --all
 
-VM_NAME = 'centos78-0'
+VM_NAME='centos78-0'
 # 虚机信息
-virsh dominfo VM_NAME
+virsh dominfo $VM_NAME
 
 # 关机
-virsh shutdown VM_NAME
+virsh shutdown $VM_NAME
 
 # 开机
-virsh start VM_NAME
+virsh start $VM_NAME
 
 # 自启动
-virsh autostart VM_NAME
+virsh autostart $VM_NAME
 
 # 取消自启动
-virsh autostart --disable VM_NAME
+virsh autostart --disable $VM_NAME
 
 # 删除虚机
-virsh undefine VM_NAME
+virsh undefine $VM_NAME
 
 # 进入虚机控制台
-virsh console VM_NAME
+virsh console $VM_NAME
 
 # 退出虚机控制台
 快捷键： ctrl+]
