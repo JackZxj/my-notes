@@ -1,5 +1,90 @@
 # use curl to connect k8s api
 
+## With K8s CA
+
+``` Python
+def create_cert(conf_path, key_path="/data/board/cert/apiserver-key.pem", cert_path="/data/board/cert/apiserver.pem", ca_key="/etc/board/cert/ca-key.pem", ca_cert="/etc/board/cert/ca.pem"):
+        cert_dir = os.path.dirname(cert_path)
+        csr_path = os.path.join(cert_dir, "request.csr")
+        rc = subprocess.call(["openssl", "genrsa", "-out", key_path, "2048"], stdout=FNULL, stderr=subprocess.STDOUT)
+        if rc != 0:
+                return rc
+        rc = subprocess.call(["openssl", "req", "-new", "-key", key_path, "-out", csr_path, "-config", conf_path], stdout=FNULL, stderr=subprocess.STDOUT)
+        if rc != 0:
+                return rc
+        return subprocess.call(["openssl", "x509", "-req", "-in", csr_path, "-CA", ca_cert, "-CAkey", ca_key, "-CAcreateserial", "-out", cert_path, "-days", "10000", "-extensions", "v3_ext", "-extfile", conf_path], stdout=FNULL, stderr=subprocess.STDOUT)
+
+create_cert("/root/Deploy/config/apiserver/openssl.conf")
+# $ cat /root/Deploy/config/apiserver/openssl.conf
+# [ req ]
+# default_bits = 2048
+# prompt = no
+# default_md = sha256
+# req_extensions = req_ext
+# distinguished_name = dn
+
+# [ dn ]
+# CN = board-apiserver
+
+# [ req_ext ]
+# subjectAltName = @alt_names
+
+# [ alt_names ]
+# DNS.1 = kubernetes
+# DNS.2 = kubernetes.default
+# DNS.3 = kubernetes.default.svc
+# DNS.4 = kubernetes.default.svc.cluster
+# DNS.5 = kubernetes.default.svc.cluster.local
+# IP.1 = 10.221.2.75
+# IP.2 = 10.254.0.1
+# IP.3 = 127.0.0.1
+
+# [ v3_ext ]
+# authorityKeyIdentifier=keyid,issuer:always
+# basicConstraints=CA:FALSE
+# keyUsage=keyEncipherment,dataEncipherment
+# extendedKeyUsage=serverAuth,clientAuth
+# subjectAltName=@alt_names
+```
+
+``` BASH
+# 使用 k8s ca访问
+# 匿名访问 /etc/board/cert/ca.pem=/etc/kubernetes/pki/ca.crt
+$ curl https://10.221.2.75:6443/version --cacert /etc/kubernetes/pki/ca.crt
+{
+  "major": "1",
+  "minor": "18",
+  "gitVersion": "v1.18.3",
+  "gitCommit": "2e7996e3e2712684bc73f0dec0200d64eec7fe40",
+  "gitTreeState": "clean",
+  "buildDate": "2020-05-20T12:43:34Z",
+  "goVersion": "go1.13.9",
+  "compiler": "gc",
+  "platform": "linux/amd64"
+}
+# 带认证访问
+$ curl https://10.221.2.75:6443/api/v1/namespaces/default/serviceaccounts/default --cacert /etc/board/cert/ca.pem --key /data/board/cert/apiserver-key.pem --cert /data/board/cert/apiserver.pem
+{
+  "kind": "ServiceAccount",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "default",
+    "namespace": "default",
+    "selfLink": "/api/v1/namespaces/default/serviceaccounts/default",
+    "uid": "0be161f5-f15b-4c34-bd7f-6643a62aca33",
+    "resourceVersion": "481",
+    "creationTimestamp": "2021-01-14T07:24:33Z"
+  },
+  "secrets": [
+    {
+      "name": "default-token-v2fbx"
+    }
+  ]
+}
+```
+
+## With K8s ServiceAccount Token
+
 ``` BASH
 ACCOUNT=test
 NAMESPACE=default
