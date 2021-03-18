@@ -1,4 +1,43 @@
-## prepare
+# Kubeedge 自定义消息路由简析及试用
+
+## Background
+
+* **实质:**
+
+  通过k8s的crd创建消息路由，借助websocket消息通道，实现云边的消息
+
+* **目标:**
+  + cloud to edge (rest->eventbus)
+
+    云端应用发送消息给cloudcore创建的Restful api，cloudcore接收消息后通过eventbus转发给边缘端，通过边缘端的eventbus发布到MQTT topic中
+
+  + edge to cloud (eventbus->rest)
+
+    边缘发布消息到MQTT topic中，通过边缘的eventbus将消息转发至云端，云端接收消息后调用restful api返给云端应用
+
+  + cloud to edge (rest->servicebus) (v1.6尚不可用，预计v1.7上线)
+
+    调用云端cloudcore的api，转发给边缘应用的api
+
+## CRD definition
+
+**RuleEndpoint:**
+
+![RuleEndpoint](../images/kubeedge%20custom%20message/crd-definition-RuleEndpoint.png)
+
+**Rule:**
+
+![Rule](../images/kubeedge%20custom%20message/crd-definition-Rule.png)
+
+## How it works
+
+以 cloud to edge (rest->eventbus) 模式为例:
+
+![Router](../images/kubeedge%20custom%20message/router.png)
+
+## Trying out
+
+### prepare
 
 ``` BASH
 # On cloud node
@@ -10,7 +49,7 @@ $ pkill cloudcore
 $ nohup cloudcore > /var/log/kubeedge/cloudcore.log 2>&1 &
 ```
 
-## cloud to edge (rest->eventbus)
+### 1. cloud to edge (rest->eventbus)
 
 ``` yaml
 apiVersion: rules.kubeedge.io/v1
@@ -53,7 +92,7 @@ $ mosquitto_sub -t 'test' -d
 $ curl -X POST 127.0.0.1:9443/centos78-edge-0/default/a --header 'Content-Type: application/json' -d '{"message":"hello"}'
 ```
 
-## edge to cloud (eventbus->rest)
+### 2. edge to cloud (eventbus->rest)
 
 ``` yaml
 apiVersion: rules.kubeedge.io/v1
@@ -99,7 +138,7 @@ method: POST
 json: {"edgemsg":"msgtocloud"}
 ```
 
-## ~~cloud to edge (rest->servicebus)~~ paln on v1.7, not ready on v1.6
+### ~~3. cloud to edge (rest->servicebus)~~ plan on v1.7, not available on v1.6
 
 ``` yaml
 apiVersion: rules.kubeedge.io/v1
@@ -150,9 +189,9 @@ $ go run main.go
 
 ```
 
-## attachment
+## Attachment
 
-main.go
+**main.go**
 
 ``` Go
 package main
