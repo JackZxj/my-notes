@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-svc-test
+  labels:
+    app: headless-svc
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: sts-nginx
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sts-test
+spec:
+  serviceName: headless-svc-test
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sts-nginx
+  template:
+    metadata:
+      labels:
+        app: sts-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80

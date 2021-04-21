@@ -39,7 +39,7 @@ mkdir -p /etc/docker && touch /etc/docker/daemon.json
 cat > /etc/docker/daemon.json << EOF
 {
     "registry-mirrors": [
-        "https://dockerhub.azk8s.cn",
+        "http://hub-mirror.c.163.com",
         "https://reg-mirror.qiniu.com"
     ]
 }
