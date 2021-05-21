@@ -24,7 +24,7 @@ $ kubectl apply -f custom-resources.yaml
 
 具体表现的问题为: 
 
-* 无法用 `service_name..default.svc.cluster.local` 访问部署的服务
+* 无法用 `service_name.default.svc.cluster.local` 访问部署的服务
 * `kubectl get po -n calico-system -owide` 发现 master 上的 calico node 不是 ready 状态
 * `kubectl describe po calico-node-vr5hl -n calico-system` 结尾显示 `calico/node is not ready: BIRD is not ready: BGP not established with ...`
 
