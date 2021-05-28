@@ -90,6 +90,15 @@ $ kubectl edit samples.demo.test.io sample-sample # 修改replicas属性值，�
 
 ![deploy](../images/operator-from-0-to-1/deploy.png)
 
+**清除部署:**
+
+``` BASH
+# 删除 CustomResource
+$ kubectl delete -f config/samples/demo_v1alpha1_sample.yaml
+# 部署
+$ make undeploy
+```
+
 ### CRD.yaml 进阶操作
 
 ![advanced-option-0](../images/operator-from-0-to-1/advanced-option-0.png)
