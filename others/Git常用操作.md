@@ -29,6 +29,10 @@ git revert -n <commit_id>    # 相当于提交一个新的 commit， commit的�
 # 可以看看这个关于高级合并的说明： https://git-scm.com/book/zh/v2/Git-%E5%B7%A5%E5%85%B7-%E9%AB%98%E7%BA%A7%E5%90%88%E5%B9%B6
 
 git push <orginName> <localBranch>:<originBranch>    # 将本地分支推送到源，若 localBranch 为空，则删除远程 originBranch
+
+# 远程分支已删除，本地还能看到被删除的远程分支
+git remote show <orginName>     # 查看本地分支和远程分支的关系，如果有已被删除的远程分支会显示 stale
+git remote prune <orginName>    # 清除本地缓存中已删除的远程分支
 ```
 
 ``` mermaid
