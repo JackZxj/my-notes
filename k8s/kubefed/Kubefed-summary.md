@@ -124,8 +124,8 @@ Github:
 
 目前并无明确的 Roadmap, 目前社区在做的一些方向是:
 
-* 切割当前的项目为两个子项目, 一个是核心能力, 一个是调度
-* 支持控制平面支持拉取模式
+* 切割当前的项目为两个子项目, 一个是核心能力, 一个是调度 [Split kubefed repo](https://github.com/kubernetes-sigs/kubefed/issues/1330)
+* 支持控制平面支持拉取模式 [pull mode](https://github.com/kubernetes-sigs/kubefed/blob/master/docs/keps/20200619-kubefed-pull-reconciliation.md)
 * 清除一些实验性功能以保证代码清洁和简化维护
 
 ## 可扩展性
