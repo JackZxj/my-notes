@@ -7,7 +7,7 @@
 
 ## 架构和总体实现机制
 
-![concepts](../images/Kubefed-summary/concepts.png)
+![concepts](../../images/Kubefed-summary/concepts.png)
 
 Kubefed 使用 kubernetes 上广泛使用的 `CRD` + `controller` 模式来管理多集群，因此能和普通的 k8s 兼容，无需做额外的改造，目前项目尚处于 Alpha 版。
 
