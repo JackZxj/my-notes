@@ -28,7 +28,7 @@
 
 ## Poseidon
 
-https://github.com/kubernetes-sigs/poseidon
+github: [poseidon](https://github.com/kubernetes-sigs/poseidon)
 
 Poseidon 是 Firmament 调度器在 k8s 中的实现。Firmament 可以将工作负载和集群建模为流网络，并在这些网络上运行最小成本流优化以做出调度决策。完整说明：
 
@@ -49,7 +49,7 @@ Poseidon 是 Firmament 调度器在 k8s 中的实现。Firmament 可以将工作
 
 ## Prometheus-adapter
 
-https://github.com/kubernetes-sigs/prometheus-adapter
+github: [prometheus-adapter](https://github.com/kubernetes-sigs/prometheus-adapter)
 
 Horizo​​ntal Pod Autoscaler(HPA) 用于自动动态调整计算能力。当 HPA 使用自定义指标作为判断时，需要提供标准的 Custom Metric API，，当前大部分用户使用 Prometheus-Adapter 来提供 Custom Metric API，其主要功能是将接受到 custom metric api 转换成 Prometheus 的请求，从 Prometheus 中查询数据返回给 API Server
 
@@ -57,13 +57,13 @@ Horizo​​ntal Pod Autoscaler(HPA) 用于自动动态调整计算能力。当 
 
 ## provider-aws-test-infra
 
-[provider-aws-test-infra](https://github.com/kubernetes-sigs/provider-aws-test-infra)
+github: [provider-aws-test-infra](https://github.com/kubernetes-sigs/provider-aws-test-infra)
 
 为 AWS 仓库共享的测试基础架构。目前项目为空。
 
 ## reference-docs
 
-[reference-docs](https://github.com/kubernetes-sigs/reference-docs)
+github: [reference-docs](https://github.com/kubernetes-sigs/reference-docs)
 
 为 Kubernetes API 和 CLI 构建参考文档的工具
 
@@ -71,25 +71,25 @@ Horizo​​ntal Pod Autoscaler(HPA) 用于自动动态调整计算能力。当 
 
 ## release-notes
 
-[reference-notes](https://github.com/kubernetes-sigs/reference-notes)
+github: [reference-notes](https://github.com/kubernetes-sigs/reference-notes)
 
 轻量级发版说明web，可帮助用户跟踪不断变化的 Kubernetes 代码库
 
 ## release-sdk
 
-https://github.com/kubernetes-sigs/release-sdk
+github: [release-sdk](https://github.com/kubernetes-sigs/release-sdk)
 
 用于构建Kubernetes版本的接口和实现。 目前只初始化了仓库，没有实际作用。
 
 ## release-utils
 
-https://github.com/kubernetes-sigs/release-utils
+github: [release-utils](https://github.com/kubernetes-sigs/release-utils)
 
 用于发布子项目和 K8s 版本的微型工具集。
 
 ## scheduler-plugins
 
-https://github.com/kubernetes-sigs/scheduler-plugins
+github: [scheduler-plugins](https://github.com/kubernetes-sigs/scheduler-plugins)
 
 用于新增一个 k8s 调度器或者替换默认的调度器。该仓库提供了一个新的调度器以及适用于该调度器的一些插件，用于自定义调度器的一些流程或者算法。
 
@@ -97,13 +97,13 @@ https://github.com/kubernetes-sigs/scheduler-plugins
 
 ## secrets-store-csi-driver
 
-[secrets-store-csi-driver](https://github.com/kubernetes-sigs/secrets-store-csi-driver)
+github: [secrets-store-csi-driver](https://github.com/kubernetes-sigs/secrets-store-csi-driver)
 
 Secrets Store CSI driver 允许 Kubernete s将存储在企业级（指 aws/azure等 公有云）外部密钥存储中的多个 Secret、密钥和证书作为卷装载到 POD 中。挂载卷后，其中的数据将装入容器的文件系统。
 
 ## security-profiles-operator
 
-[secrets-store-csi-driver](https://github.com/kubernetes-sigs/secrets-store-csi-driver)
+github: [secrets-store-csi-driver](https://github.com/kubernetes-sigs/secrets-store-csi-driver)
 
 该项目是 K8s 的一个安全增强 Operator，旨在使在 Kubernetes 中管理和应用 seccomp 和 AppArmor 配置文件更加简单直接。随着未来发展，本项目将以帮助 Kubernetes 用户为 seccomp、AppArmor、SeLinux、PodSecurityPolicies 和 RBAC 权限创建、分发和应用安全配置文件为主要目标。
 
@@ -120,7 +120,7 @@ Secrets Store CSI driver 允许 Kubernete s将存储在企业级（指 aws/azure
 
 ## service-catalog
 
-[service-catalog](https://github.com/kubernetes-sigs/service-catalog)
+github: [service-catalog](https://github.com/kubernetes-sigs/service-catalog)
 
 [概念](https://svc-cat.io/docs/concepts/)
 
@@ -140,7 +140,7 @@ service-catalog 项目正在孵化中，其通过 [Open Service Broker API](http
 
 ## sig-storage-lib-external-provisioner
 
-[sig-storage-lib-external-provisioner](https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner)
+github: [sig-storage-lib-external-provisioner](https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner)
 
 一个用于编写自定义外部存储 provider 的工具。用于 StorageClass。
 
@@ -148,7 +148,7 @@ service-catalog 项目正在孵化中，其通过 [Open Service Broker API](http
 
 ## sig-storage-local-static-provisioner
 
-[sig-storage-local-static-provisioner](https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner)
+github: [sig-storage-local-static-provisioner](https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner)
 
 本地卷静态配置器通过为主机上的每个本地磁盘检测和创建 PV 并在释放时清理磁盘来管理预分配磁盘的 PersistentVolume 生命周期，不支持动态配置。
 
@@ -156,13 +156,13 @@ service-catalog 项目正在孵化中，其通过 [Open Service Broker API](http
 
 ## sig-usability
 
-[sig-usability](https://github.com/kubernetes-sigs/sig-usability)
+github: [sig-usability](https://github.com/kubernetes-sigs/sig-usability)
 
 空项目。猜测是用于管理 sig 项目的可用性的。
 
 ## sig-windows-dev-tools
 
-[sig-windows-dev-tools](https://github.com/kubernetes-sigs/sig-windows-dev-tools)
+github: [sig-windows-dev-tools](https://github.com/kubernetes-sigs/sig-windows-dev-tools)
 
 这是一个全量的 Kubernetes 上的 Windows 开发环境，包括：
 
@@ -170,26 +170,26 @@ service-catalog 项目正在孵化中，其通过 [Open Service Broker API](http
 - 最新的Containerd
 - 支持两个 CNI：antrea 或 calico on containerd：在 variables.yml 中配置您的 CNI 选项
   - 基于 containerd 的 calico 3.19 支持开箱即用
-  - antrea 0.13.2 可运行但需要额外运行https://github.com/antrea-io/antrea/issues/2344的补丁，该补丁最近可用
+  - antrea 0.13.2 可运行但需要额外运行 https://github.com/antrea-io/antrea/issues/2344 的补丁，该补丁最近可用
 - Antrea和Calico提供的对 Windows 和 Linux 的 NetworkPolicy 支持
 - 完全从源代码构建的 kube-proxy.exe 和 kubelet.exe 的 Windows 二进制文件（基于 K8s 主分支）
 - Kubeadm 安装可以将前沿 Linux 控制平面配置到位，因此您可以测试新功能，如特权容器
 
 ## sig-windows-samples
 
-[sig-windows-samples](https://github.com/kubernetes-sigs/sig-windows-samples)
+github: [sig-windows-samples](https://github.com/kubernetes-sigs/sig-windows-samples)
 
 和 k8s 中的 sig-windows 相关的样本和示例。包含了一个培训用户使用 Visual Studio 和开发实践的相关文档。
 
 ## sig-windows-tools
 
-[sig-windows-tools](https://github.com/kubernetes-sigs/sig-windows-tools)
+github: [sig-windows-tools](https://github.com/kubernetes-sigs/sig-windows-tools)
 
 和 k8s 中的 sig-windows 相关的工具和产成品。存储了辅助 Kubeadm 和 Wincat 和 Flannel 的脚本。
 
 ## slack-infra
 
-[slack-infra](https://github.com/kubernetes-sigs/slack-infra)
+github: [slack-infra](https://github.com/kubernetes-sigs/slack-infra)
 
 此 repo 包含用于 Kubernetes slack 实例的工具。
 
@@ -205,7 +205,7 @@ service-catalog 项目正在孵化中，其通过 [Open Service Broker API](http
 
 ## structured-merge-diff
 
-[structured-merge-diff](https://github.com/kubernetes-sigs/structured-merge-diff)
+github: [structured-merge-diff](https://github.com/kubernetes-sigs/structured-merge-diff)
 
 “服务端 apply”的测试用例和实现。此 repo 包含实现 Kubernetes “apply” 操作的代码。
 
