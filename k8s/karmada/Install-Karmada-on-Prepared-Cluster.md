@@ -136,7 +136,7 @@ $ kubectl delete cluster $MEMBER_CLUSTER_NAME
 - control plane kubeconfig
 - cluster kubeconfig
 
-### join
+### join cluster
 
 ```BASH
 #  on cluster (optional, because this cluster was created by kind)
@@ -165,7 +165,7 @@ $ kubectl config use-context karmada-apiserver
 $ karmadactl join ${MEMBER_CLUSTER_NAME} --cluster-kubeconfig=$CLUSTER_KUBECONFIG
 ```
 
-### unjoin
+### unjoin cluster
 
 ```BASH
 # on control plane
@@ -180,11 +180,3 @@ $ export KUBECONFIG="${KARMADA_APISERVER_KUBECONFIG}"
 $ kubectl config use-context karmada-apiserver
 $ karmadactl unjoin ${MEMBER_CLUSTER_NAME} --cluster-kubeconfig=$CLUSTER_KUBECONFIG
 ```
-
-MEMBER_CLUSTER_NAME=cluster5
-KARMADA_APISERVER_KUBECONFIG="/root/karmada/cluster0.config"
-CLUSTER_KUBECONFIG="/root/karmada/cluster5.config"
-
-export KUBECONFIG="${KARMADA_APISERVER_KUBECONFIG}"
-kubectl config use-context karmada-apiserver
-karmadactl join ${MEMBER_CLUSTER_NAME} --cluster-kubeconfig=$CLUSTER_KUBECONFIG
