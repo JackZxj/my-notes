@@ -35,7 +35,7 @@ $ kubectl apply -f https://kind.sigs.k8s.io/examples/loadbalancer/metallb-config
 # prepare images
 $ kind load docker-image k8s.gcr.io/kube-apiserver:v1.19.1 --name cluster0
 $ kind load docker-image swr.ap-southeast-1.myhuaweicloud.com/karmada/karmada-controller-manager --name cluster0
-$ kind load docker-image swr.ap-southeast-1.myhuaweicloud.com/karmada/karmada-karmada-scheduler --name cluster0
+$ kind load docker-image swr.ap-southeast-1.myhuaweicloud.com/karmada/karmada-scheduler --name cluster0
 $ kind load docker-image swr.ap-southeast-1.myhuaweicloud.com/karmada/karmada-webhook --name cluster0
 $ kind load docker-image k8s.gcr.io/kube-controller-manager:v1.19.1 --name cluster0
 
