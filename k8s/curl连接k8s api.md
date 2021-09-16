@@ -94,7 +94,7 @@ kubectl create sa $ACCOUNT -n=$NAMESPACE
 
 kubectl create clusterrolebinding $CRB_NAME --clusterrole='cluster-admin' --serviceaccount=$NAMESPACE:$ACCOUNT
 
-TOKEN=$(kubectl get secret $(kubectl get serviceaccount $ACCOUNT -n=$NAMESPACE -o jsonpath='{.secrets[0].name}') -o jsonpath='{.data.token}' | base64 --decode )
+TOKEN=$(kubectl get secret $(kubectl get serviceaccount $ACCOUNT -n=$NAMESPACE -o jsonpath='{.secrets[0].name}') -n=$NAMESPACE -o jsonpath='{.data.token}' | base64 --decode )
 
 curl https://192.168.137.115:6443/api/v1/nodes --header "Authorization: Bearer $TOKEN" --insecure
 
