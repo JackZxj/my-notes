@@ -38,4 +38,9 @@ index 82d449c..d2c036f 100755
 
 $ export KARMADA_APISERVER_SECURE_PORT=32443
 $ hack/remote-up-karmada.sh /root/jackzhang/config.json external true
+
+# 删除一些资源用于重装
+$ kubectl delete deploy,svc,rs,sts,cm,sa,secret --all -n karmada-system
+# 查看某一命名空间内的所有资源
+$ kubectl api-resources --verbs=list --namespaced -o name   | xargs -n 1 kubectl get --show-kind --ignore-not-found -n karmada-system
 ```
