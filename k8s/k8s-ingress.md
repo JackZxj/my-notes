@@ -217,3 +217,88 @@ $ kubectl delete -f ingress1.yaml
 ## multiple-ingress
 
 TODO: https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+
+## external-ip ingress
+
+ref: https://stackoverflow.com/questions/61751724/kubernetes-ingress-rules-for-external-service-with-externalname-type
+
+```BASH
+$ vi ingress-externalNameSVC-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+  namespace: test-alpha
+spec:
+  clusterIP: None
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: my-service
+  namespace: test-alpha
+subsets:
+  - addresses:
+      - ip: 10.244.0.83  # a nginx pod's IP, which runs in default namespace
+      - ip: 110.242.68.3 # IP of www.baidu.com
+      - ip: 110.242.68.4 # IP of www.baidu.com
+    ports:
+      - port: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nginx-sss
+  namespace: test-alpha
+spec:
+  rules:
+  - host: nginx2.foo.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-service
+            port:
+              number: 80
+  ingressClassName: nginx
+
+$ kubectl apply -f ingress-externalNameSVC-headless.yaml
+
+# Ingress will randomly route to three endpoints
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+200
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+200
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+200
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+200
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+200
+$ curl -sIL -w "%{http_code}\n" -o /dev/null  172.19.255.101 -H 'Host: nginx2.foo.org'
+403
+```
