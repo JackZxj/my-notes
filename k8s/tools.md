@@ -5,6 +5,10 @@ journalctl -u kubelet -n 100 --no-pager -f
 # namespace 下所有资源
 kubectl api-resources --verbs=list --namespaced -o name \
   | xargs -n 1 kubectl get --show-kind --ignore-not-found -l <label>=<value> -n <namespace>
+
+# 删除 Terminating namespace
+NS=my-namespace
+kubectl get namespace $NS -o json   | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/"   | kubectl replace --raw /api/v1/namespaces/$NS/finalize -f -
 ```
 
 ```BASH
