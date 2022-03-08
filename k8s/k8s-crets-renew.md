@@ -74,3 +74,7 @@ $ kubeadm init phase upload-config kubeadm --config kubeadm-init.yaml
 # 查看该 config
 $ kubectl -n kube-system get configmap kubeadm-config -o yaml
 ```
+
+## 20211228
+
+执行完 `phase certs apiserver` 可能还得 `renew all`
