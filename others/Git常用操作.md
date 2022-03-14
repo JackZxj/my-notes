@@ -33,6 +33,12 @@ git push <orginName> <localBranch>:<originBranch>    # 将本地分支推送到�
 # 远程分支已删除，本地还能看到被删除的远程分支
 git remote show <orginName>     # 查看本地分支和远程分支的关系，如果有已被删除的远程分支会显示 stale
 git remote prune <orginName>    # 清除本地缓存中已删除的远程分支
+
+# 取消本地 commit
+git reset --soft HEAD^ # 取消上一次 commit 使其返回到暂存 (staged) 状态
+git reset --mixed HEAD~2 # 取消前两次 commit 且取消暂存，reset 的默认操作，等价于 git reset HEAD~2 
+git reset --hard <commit_id> # 回退到某一次 commit 并且清除所有改动
+git reset --hard <origin/originBranch> # 回退到和远程一样并且清除所有改动
 ```
 
 ``` mermaid
