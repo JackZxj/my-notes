@@ -1,5 +1,6 @@
 ## normal operation
-``` bash
+
+```bash
 git init    # 初始化代码仓库，用于在新文件夹内执行
 git remote add <orginName> <http://xxxxxxxx.git>    # 添加源并为该源取名为orginName
 git remote rm <orginName>    # 删除某个源
@@ -39,9 +40,14 @@ git reset --soft HEAD^ # 取消上一次 commit 使其返回到暂存 (staged) �
 git reset --mixed HEAD~2 # 取消前两次 commit 且取消暂存，reset 的默认操作，等价于 git reset HEAD~2 
 git reset --hard <commit_id> # 回退到某一次 commit 并且清除所有改动
 git reset --hard <origin/originBranch> # 回退到和远程一样并且清除所有改动
+
+# 查看本地所有分支的最后 commit 时间
+git for-each-ref --sort='-committerdate:iso8601' --format=' %(committerdate:iso8601)%09%(refname)' refs/heads
+# 如果需要看某个远程分支，运行 git fetch <orginName> 后
+git for-each-ref --sort='-committerdate:iso8601' --format=' %(committerdate:iso8601)%09%(refname)' refs/remotes/<orginName>
 ```
 
-``` mermaid
+```mermaid
 graph LR
 A[Remote] -->|fetch/clone| B[Repository]
 B -->|push| A
@@ -54,10 +60,10 @@ E[git operation ]
 
 ## git commit
 
-feat：新功能（feature）
-fix：修补bug
-docs：文档（documentation）
-style： 格式（不影响代码运行的变动）
-refactor：重构（即不是新增功能，也不是修改bug的代码变动）
-test：增加测试
-chore：构建过程或辅助工具的变动
+* feat：新功能（feature）
+* fix：修补bug
+* docs：文档（documentation）
+* style： 格式（不影响代码运行的变动）
+* refactor：重构（即不是新增功能，也不是修改bug的代码变动）
+* test：增加测试
+* chore：构建过程或辅助工具的变动
