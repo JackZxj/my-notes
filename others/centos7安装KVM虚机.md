@@ -70,6 +70,9 @@ virsh dominfo $VM_NAME
 # 关机
 virsh shutdown $VM_NAME
 
+# 强制关机
+virsh destroy $VM_NAME
+
 # 开机
 virsh start $VM_NAME
 
@@ -122,4 +125,23 @@ virsh snapshot-revert --domain centos78-0 centos78-0-snap-0
 
 # 删除快照
 virsh snapshot-delete --domain centos78-0 centos78-0-snap-0
+```
+
+## 内存扩容
+
+```BASH
+# 查看虚机
+virsh list
+# 查看目标原本信息
+virsh dominfo node1
+# 关闭虚机
+virsh shutdown node1
+# 等待关闭完成后设置可用最大内存 4194304 = 4GB  8388608 = 8GB
+virsh setmaxmem node1 8388608
+# 重启虚机
+virsh start node1
+# 设置虚机的内存
+virsh setmem node1 8388608
+# 查看扩容后信息
+virsh dominfo node1
 ```

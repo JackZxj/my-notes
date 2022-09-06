@@ -45,6 +45,15 @@ git reset --hard <origin/originBranch> # 回退到和远程一样并且清除所
 git for-each-ref --sort='-committerdate:iso8601' --format=' %(committerdate:iso8601)%09%(refname)' refs/heads
 # 如果需要看某个远程分支，运行 git fetch <orginName> 后
 git for-each-ref --sort='-committerdate:iso8601' --format=' %(committerdate:iso8601)%09%(refname)' refs/remotes/<orginName>
+
+# 浅克隆
+git clone <path> --depth=N
+# 从浅克隆恢复到完整仓库
+git fetch --unshallow
+
+
+# 强制更新本地的 tag，解决tag冲突，如 would clobber existing tag
+git fetch --tags -f
 ```
 
 ```mermaid

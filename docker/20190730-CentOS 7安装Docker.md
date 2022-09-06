@@ -43,6 +43,9 @@ sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/cen
 # 更新yum的软件源缓存
 sudo yum makecache fast
 
+# 查看可安装版本
+yum list docker-ce --showduplicates | sort -r
+
 # 安装docker
 sudo yum install docker-ce -y
 ```
