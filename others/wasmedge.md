@@ -7,7 +7,33 @@ ref:
 
 WasmEdge 是轻量级、安全、高性能、实时的软件容器与运行环境。目前是 CNCF 沙箱项目。WasmEdge 被应用在 SaaS、云原生，service mesh、边缘计算、汽车等领域。
 
-## install
+## about wasm
+
+WebAssembly(wasm) 是一种新的编码方式，其编码结果可以产生一种低级的类汇编语句，具有紧凑的二进制格式，可以接近原生的性能运行。（wasm 的原生编程语言还在制定标准中）
+
+简单来说，目前 wasm 不是一种新的编程语言，而是一种可以被 wasm runtime 解析并运行的二进制文本。类似于 java 程序会被编译成字节码 class，这个 class 的地位就跟 wasm 差不多：class 可以被 JVM 解析并运行，wasm 可以被 chrome V8 引擎或者 wasmedge 之类的运行时解析并运行。不同的是 java 的字节码是由 java 语言（及其方言）所编译生成，wasm 可以由多种语言编译生成 (未来也可能支持原生编写)。
+
+```BASH
+----------                                               
+| golang |-----                                          
+----------    |                                          
+              |                                          
+----------    |      -----------------        ---------- 
+| C/C++  |---------->| LLVM Bytecode |------->| wasm   | 
+----------    |      -----------------        ---------- 
+              |                                          
+----------    |                                          
+| Rust   |-----                                          
+----------    |                                          
+              |                                          
+----------    |                                          
+| ...    |-----                                          
+----------                                               
+```
+
+WebAssembly 是被设计成 JavaScript 的一个完善补充，而不是它的替代品。其想法是在浏览器中安全地运行由C/C++或Rust等语言编译的高性能应用程序。在现代浏览器中，WebAssembly可以与JavaScript并行运行。随着WebAssembly在云中的使用越来越多，它现在是云原生应用程序的通用运行时。与Linux容器相比，WebAssembly运行时以更低的资源消耗实现了更高的性能。
+
+## install wasmedge
 
 ```BASH
 $ curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash
@@ -342,7 +368,12 @@ sys     0m0.020s
 
 ## Embed WasmEdge Into A Host Application
 
-* wasmedge 现支持与其他语言的程序进行集成，目前支持 `C` `Go` `Rust` `Node.js` 及一些 Serverless 服务如 aws Lambda
+wasmedge 现支持与其他语言的程序进行集成，即其他语言通过引入 wasmedge 的 SDK 工具包，来实现程序中启动一个 wasmedge 虚机，运行 wasm 程序并返回结果。
+
+例如：
+有一个 golang 程序，需要使用到一个由 Rust 编写的 AI 程序的结果，经过二次处理后返回给用户。那么目前主流的做法是分别为 go 程序、 rust 程序定义好接口调用方式，通过 restful 或者 rpc 调用实现多语言程序的协同。如果使用 wasm 的技术的话，就可以将该 rust 的程序编译成 wasm 文件，在 go 程序运行时可以按需要启动一个 wasmedge 虚机运行该 wasm 文件，使得单个go程序支持多语言的项目。
+
+* 目前支持 `C` `Go` `Rust` `Node.js` 及一些 Serverless 服务如 aws Lambda
 * 目前跨语言集成的参数传递与结果返回仅支持简单参数如字符串、数字等，`Go` `Rust` 可以通过 `bindgen` 支持了一些复杂参数的传递
 
 examples: https://www.secondstate.io/articles/extend-golang-app-with-webassembly-rust/
@@ -359,11 +390,135 @@ examples: https://www.secondstate.io/articles/extend-golang-app-with-webassembly
 
 目前只有 `crun` 支持 wasm 的镜像，并且该镜像还需要使用 `module.wasm.image/variant=compat-smart` 的注解来标记是普通容器镜像还是 wasm 镜像。
 
-编镜像的流程可参考：https://github.com/second-state/wasmedge-containers-examples/blob/29fe23561f58f5fb11d4009ccf98e8eac174e93c/simple_wasi_app.md
+编镜像的流程可参考下方的 [wasm images](#wasm-images) 或者官方文档：https://github.com/second-state/wasmedge-containers-examples/blob/29fe23561f58f5fb11d4009ccf98e8eac174e93c/simple_wasi_app.md
 
 在 CRI-O 中使用的流程可参考 （主要把默认的 runc 改成 crun）：https://github.com/second-state/wasmedge-containers-examples/blob/29fe23561f58f5fb11d4009ccf98e8eac174e93c/crio/README.md
 
 在 kubernetes 中使用的流程（主要是在初始化的时候选择使用 CRI-O 作为容器运行时，并且在 Pod 运行时需要添加 `module.wasm.image/variant=compat-smart` 的注解）可以参考：https://github.com/second-state/wasmedge-containers-examples/blob/a14642f47b25dd9622a16038d9031ea13750e600/kubernetes_crio/README-zh.md
+
+### about crun
+
+一个快速和低内存占用的完全符合 OCI 规范的容器运行时，完全使用 C 编写。
+
+> 虽然 Linux 容器生态系统中使用的大多数工具都是用 Go 编写的，但官方认为 C 更适合于像容器运行时这样的低级工具。runc 是用 Go 编写的 OCI 运行时规范的最常用实现，它会在容器进程启动前重新运行自身，并使用C编写的模块设置一些运行环境。
+> 
+> crun 的目标也包括作为一个可以轻松地包含在程序中的库，而不需要外部进程来管理 OCI 容器。
+> 
+> -- from https://github.com/containers/crun#why-another-implementation
+
+相比较 runc 的优势：
+
+* 容器运行的速度更快
+* 使用的内存更少 （runc 至少需要 4MB 内存， crun 可以少于 1MB）
+
+### crun with wasmedge
+
+crun 的默认版本同样不支持 wasmedge，因此需要使用 wasmedge 的配置进行编译
+
+ref: https://github.com/containers/crun#dependencies
+
+```BASH
+# 安装依赖
+$ sudo apt update
+$ sudo apt install -y make git gcc build-essential pkgconf libtool \
+   libsystemd-dev libprotobuf-c-dev libcap-dev libseccomp-dev libyajl-dev \
+   go-md2man libtool autoconf python3 automake
+
+# 编译 crun
+$ git clone https://github.com/containers/crun
+$ cd crun
+$ ./autogen.sh
+$ ./configure --with-wasmedge   # 默认是不带这个参数的，不带这个参数就无法使用 wasmedge
+$ make
+$ sudo make install
+```
+
+### crun with other runtime
+
+ref: 
+* [Want to know about different WASM runtimes ?](https://www.wasm.builders/shravi_inamdar/want-to-know-about-different-wasm-runtimes--518j)
+* [WebAssembly生态及关键技术综述](https://blog.csdn.net/qiwoo_weekly/article/details/125883779)
+
+在 crun 构建时可以使用以下参数来支持其他运行时
+
+```BASH
+  --with-mono             build with mono support
+  --with-wasmer           build with wasmer support
+  --with-wasmtime         build with wasmtime support
+  --with-wasmedge         build with WasmEdge support
+  --with-libkrun          build with libkrun support
+```
+
+参数说明：
+* with-mono:
+  * dotnet 容器的运行时，可以将 dotnet 技术栈的程序打包成镜像用于运行。可以参考官方示例：https://github.com/containers/crun/blob/main/docs/mono-example.md
+* with-wasm* （都是 wasm 的运行时）
+  * wasmer: 
+    * 可插拔性：与各种编译框架兼容，无论您需要什么（例如：Cranelift、LLVM）
+    * 速度/安全性：能够在完全沙盒的环境中以接近本机的速度运行Wasm。（官方宣传比 wasmtime 快）
+    * 通用性：适用于任何平台（Windows，Linux等）和芯片组
+    * 支持：符合WebAssembly测试套件标准，拥有庞大的开发人员和贡献者社区支持
+  * wasmtime: (目前主要支持 x86 环境)
+    * 紧凑：要求不高的独立运行时，您可以随着需求的增长而扩展。可以使用小型芯片或与大型服务器一起使用。几乎可嵌入任何应用程序
+    * 易于修改：调整Wasmtime以进行预编译，使用Lightbeam生成光速代码，或用于运行时解释。配置您需要 Wasm 完成的任何任务
+    * 快速：与 Cranelift 兼容;运行高效
+    * 与 WASI 兼容：支持更新 API，允许自定义符合 WASI 接口规范的实现
+    * 支持：符合WebAssembly测试套件标准，拥有庞大的开发人员和贡献者社区支持
+  * wasmedge:
+    * 主要应用在云原生，希望抢占边缘计算场景下的容器运行时市场
+* with-libkrun
+  * libkrun是一个动态库，允许程序使用KVM虚拟化轻松获得在部分隔离环境中运行进程的能力。
+  * 它将VMM（虚拟机监视器，虚拟机监控程序的用户空间侧）与其目的所需的最少数量的仿真设备集成在一起，抽象了虚拟机管理带来的大部分复杂性，为用户提供了一个简单的C API。
+
+### wasm images
+
+ref:
+* [Buildah入门](https://zhuanlan.zhihu.com/p/39736486)
+
+目前 wasm 的容器镜像不支持使用 docker 构建，因为 docker 不支持 wasm 所需的镜像注解 `annotation` 功能。因此使用另外的命令行工具 `buildah` 来构建镜像。
+
+`buildah` 是一个与 OCI 标准兼容的镜像构建工具，其除了支持 Dockerfile 模式构建之外，还支持命令行模式进行镜像构建。
+
+与docker不同的是: docker build 需要 dockerd (docker 的守护进程)来构建，而 buildah 不需要额外的组件；docker build会按层级构建，并且每一层都会缓存，而 buildah 只是从头到尾进行一次构建（docker模式还是支持分层构建）；buildah 还支持命令行进行构建，通过内置的命令可以实现类似 dockerfile 的指令，最终打包成镜像。
+
+使用 buildah 构建 wasm 镜像的流程：
+
+1. 将程序编译成 wasm 文件（生产环境建议使用AOT编译以加快运行），在文件夹中创建一个名为 `Dockerfile` 的文件，内容如下：
+
+```Dockerfile
+FROM scratch
+COPY hello.wasm /
+CMD ["/hello.wasm"]
+```
+
+2. 使用 buildah 打包镜像，注意一定要添加 `module.wasm.image/variant=compat` 的注解
+
+```BASH
+# 编译镜像
+$ sudo buildah build --annotation "module.wasm.image/variant=compat" -t mywasm-image .
+# 推到镜像仓库，authfile 是docker仓库的用户信息
+$ sudo buildah push --authfile ~/.docker/config.json mywasm-image docker://docker.io/myrepo/example-wasi:latest
+# 运行镜像，需要注意 podman 需要切换到 crun 运行时，并且 crun 需要打开 wasm 支持
+$ podman run mywasm-image:latest
+```
+
+## wasmedge with micro-kernal
+
+ref:
+* [边缘的容器化 — WasmEdge 与 seL4](https://blog.csdn.net/weixin_42376823/article/details/121339850)
+* [WasmEdge on seL4](https://github.com/second-state/wasmedge-seL4)
+* [Build WasmEdge for Open Harmony](https://github.com/WasmEdge/WasmEdge/blob/master/utils/ohos/README-zh.md)
+
+简单来说就是将 wasmedge 编译成对应平台的可执行程序打包到对应系统中，提供相应的包调用方式即可
+
+## wasmedge with TensorFlow
+
+ref: 
+* [A WASI-like extension for Tensorflow](https://www.secondstate.io/articles/wasi-tensorflow/)
+
+AI推理是一项计算密集型任务，可以从Rust和WebAssembly的速度中受益匪浅。但是，标准 WebAssembly 沙箱提供对本机操作系统和硬件（如多核 CPU、GPU 和专用 AI 推理芯片）的访问非常有限。它不适合 AI 工作负载。
+
+流行的 WASI 为沙盒 WebAssembly 程序提供了一种设计模式，以安全地访问本机主机函数。WasmEdge 扩展了该 WASI 模型，以支持从 WebAssembly 程序访问本机 Tensorflow libraries。wasmedge 提供了WebAssembly的安全性，可移植性和易用性以及Tensorflow的类原生速度。
 
 ## wasmedge advantage and disadvantage
 
