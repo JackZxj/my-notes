@@ -1,0 +1,80 @@
+# https://kubernetes.io/zh-cn/docs/concepts/policy/limit-range/
+# https://kubernetes.io/zh-cn/docs/concepts/policy/resource-quotas/
+---
+# 限制pod中的容器
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mem-cpu-demo
+  namespace: limit-test
+spec:
+  limits:
+  # 同时配置了Pod和Container需要同时满足
+  - default:
+      memory: 512Mi
+      cpu: "800m"
+    defaultRequest:
+      memory: 256Mi
+      cpu: 0.5
+    max:
+      memory: 1Gi
+      cpu: 1
+    min:
+      memory: 256Mi
+      cpu: "500m"
+    maxLimitRequestRatio:
+      memory: 3   # container 中 limits.memory / requests.memory 不能超过 3
+      cpu: 2      # container 中 limits.cpu / requests.cpu 不能超过 2
+    type: Container
+  - max:
+      memory: 2Gi
+      cpu: 2
+    min:
+      memory: 256Mi
+      cpu: "500m"
+    maxLimitRequestRatio:
+      memory: 8   # pod 中 limits.memory / requests.memory 不能超过 3
+      cpu: 4      # pod 中 limits.cpu / requests.cpu 不能超过 2
+    type: Pod
+---
+# 限制命名空间中的使用总量
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mem-cpu-demo
+  namespace: limit-test
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    pods: "2"
+  scopeSelector:
+    matchExpressions:
+    - operator : In
+      scopeName: PriorityClass
+      values: ["high"]
+---
+# 限制存储
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: storagelimits
+spec:
+  limits:
+  - type: PersistentVolumeClaim # 高于或低于限制的会被拒绝
+    max:
+      storage: 2Gi
+    min:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: storagequota
+spec:
+  hard:
+    persistentvolumeclaims: "5"
+    requests.storage: "5Gi"
+

@@ -1,0 +1,143 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-test
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: cephfs
+---
+apiVersion: v1
+data:
+  user: Z3Vlc3Q=
+kind: Secret
+metadata:
+  name: test-user
+type: Opaque
+---
+apiVersion: v1
+data:
+  pwd: czlITlZVbER0ZA==
+kind: Secret
+metadata:
+  name: test-pwd
+type: Opaque
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-cm-1
+data:
+  test1: test1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-cm-2
+data:
+  ceshi1: ceshi1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dspo-nginx-2
+  labels:
+    app: dspo-nginx-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dspo-nginx-2
+  template:
+    metadata:
+      labels:
+        app: dspo-nginx-2
+    spec:
+      containers:
+        - image: nginx:alpine
+          imagePullPolicy: IfNotPresent
+          name: nginx
+          env:
+          - name: TEST_USER
+            valueFrom:
+              secretKeyRef:
+                name: test-user
+                key: user
+          - name: TEST_CM
+            valueFrom:
+              configMapKeyRef:
+                name: test-cm-1
+                key: test1
+          volumeMounts:
+          - name: pvc
+            mountPath: /test-pvc
+          - name: config
+            mountPath: "/config"
+            readOnly: true
+          - name: secret
+            mountPath: "/secret"
+      volumes:
+      - name: pvc
+        persistentVolumeClaim:
+            claimName: pvc-test
+      - name: config
+        configMap:
+          name: test-cm-2
+      - name: secret
+        secret:
+          secretName: test-pwd
+          defaultMode: 0644
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dspo-nginx-2
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: dspo-nginx-2
+  type: ClusterIP
+---
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: dspo-nginx-2
+spec:
+  association: true
+  resourceSelectors:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: dspo-nginx-2
+    - apiVersion: v1
+      kind: Service
+      name: dspo-nginx-2
+  placement:
+    clusterAffinity:
+      clusterNames:
+        - other1
+---
+apiVersion: policy.karmada.io/v1alpha1
+kind: OverridePolicy
+metadata:
+  name: dspo-nginx-2-other1
+spec:
+  resourceSelectors:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: dspo-nginx-2
+  targetCluster:
+    clusterNames:
+      - other1
+  overriders:
+    plaintext:
+      - operator: replace
+        path: /spec/replicas
+        value: 2

@@ -805,3 +805,28 @@ spec:
         - start
 EOF
 ```
+
+### demo
+
+``` BASH
+# for test
+$ kubectl describe service/nats-client | grep Endpoints
+Endpoints:         10.253.2.13:4222
+#   Add local DNS
+$ echo -e '10.253.2.13\t\tdemo.nats.chat' >> /etc/hosts
+# $ echo -e '172.31.0.7\t\tdemo.nats.chat\n172.31.0.7\t\tnats.chat' >> /etc/hosts # 172.31.0.7 was my VM's IP
+$ telnet demo.nats.chat 4222
+Trying 10.253.2.13...
+Connected to demo.nats.chat.
+Escape character is '^]'.
+INFO {"server_id":"NBYK57R6BCAFYI67VU6X4WRJ7SDNRV52SZBHXEVKEZCXZEHUJQTK2NU2","server_name":"NBYK57R6BCAFYI67VU6X4WRJ7SDNRV52SZBHXEVKEZCXZEHUJQTK2NU2","version":"2.1.9","proto":1,"git_commit":"7c76626","go":"go1.14.10","host":"0.0.0.0","port":4222,"auth_required":true,"max_payload":1048576,"client_id":5,"client_ip":"10.253.0.0"} 
+-ERR 'Authentication Timeout'
+Connection closed by foreign host.
+
+#   Upload the accounts:
+$ NKEYS_PATH=/root/nsc/nkeys
+$ nats-req -s tls://demo.nats.chat:4222 -creds $NKEYS_PATH/creds/KO/SYS/sys.creds "\$SYS.REQ.ACCOUNT.$(nsc list accounts 2>&1 | grep CHAT  | awk '{print $4}').CLAIMS.UPDATE" $(cat ./nsc/accounts/nats/KO/accounts/CHAT/CHAT.jwt)
+#   FIXME: workaround to prevent colors matching in the line below.
+$ rm ./nsc/accounts/nsc.json
+$ nats-req -s tls://demo.nats.chat:4222 -creds $NKEYS_PATH/creds/KO/SYS/sys.creds "\$SYS.REQ.ACCOUNT.$(nsc list accounts 2>&1 | grep ADMIN | awk '{print $4}').CLAIMS.UPDATE" $(cat ./nsc/accounts/nats/KO/accounts/ADMIN/ADMIN.jwt)
+```

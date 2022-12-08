@@ -3,6 +3,90 @@
     * 同一个struct如果成员都是简单数据类型（可比较的）就能直接比较，如果有不可比较的成员就不能直接比较。
     * 不同struct如果能相互转化，那么转化后的实例比较规则同上。不能转化的无法比较。
 
+2. 命名返回问题： 命名返回会被 return 覆盖
+
+```Go
+package main
+import "fmt"
+func named() (n, _ int) {
+    return 1, 2
+}
+func main() {
+    fmt.Print(named()) // 1 2
+}
+```
+
+以上代码输出什么？ [A: 1 0] [B: 1 2] [C: 0 0] [D: 编译错误]
+
+3. defer 延迟返回
+
+```Go
+package main
+import "fmt"
+func hello1(i *int) int {
+    defer func() {*i = 19}()
+    return *i
+}
+func hello2(i *int) (j int) {
+    defer func() {j = 19}()
+    j = *i
+    return j
+}
+func hello3(i *int) (j int) {
+    defer func() {j = 19}()
+    return *i
+}
+func main() {
+    i1 := 10
+    j1 := hello1(&i1)
+    fmt.Println(i1, j1) // 19 10
+
+    i2 := 10
+    j2 := hello2(&i2)
+    fmt.Println(i2, j2) // 10 19
+
+    i3 := 10
+    j3 := hello3(&i3)
+    fmt.Println(i3, j3) // 10 19
+}
+```
+
+```Go
+func foo() int {
+    var n int = 3
+
+    defer func() {
+        fmt.Printf("foo defer-1: %d\n", n) // foo defer-1: 5
+    }()
+
+    defer func(n int) {
+        fmt.Printf("foo defer-2: %d\n", n) //foo defer-2: 3
+    }(n)
+
+    defer func() {
+        fmt.Printf("foo defer-3: %d\n", n) // foo defer-3: 6
+        n--
+    }()
+
+    for i := 0; i < 3; i++ {
+        n++
+    }
+
+    fmt.Printf("foo: %d\n", n) // foo: 6
+
+    return n // return 6
+}
+
+func main() {
+    fmt.Printf("main: %d\n", foo()) // main 6
+} 
+// foo: 6
+// foo defer-3: 6
+// foo defer-2: 3
+// foo defer-1: 5
+// main 6
+```
+
 2. map 遍历是无序的，不能保证每次遍历结果相同，可以把 key 存到一个 slice 中，遍历 slice 实现有序访问
 
 
@@ -98,7 +182,7 @@
     > PushGateway组件让这款监控系统可以接收监控数据。
 
     **监控系统使用MQ通信的问题**
-    > 很多企业自己研发的监控系统中往往会使用消息队列Kafka和Metrics parser、Metrics process server等Metrics解析处理模块，再辅以Spark等流式处理方式。应用程序将Metric推到消息队列（如Kafaka），然后经过Exposer中转，再被Prometheus拉取。之所以会产生这种方案，是因为考虑到有历史包袱、复用现有组件、通过MQ（消息队列）来提高扩展性等因素。这个方案会有如下几个问题。
+    > 很多企业自己研发的监控系统中往往会使用消息队列Kafka和Metrics parser、Metrics process server等Metrics解析处理模块，再辅以Spark等流式处理方式。应用程序将Metric推到消息队列（如Kafka），然后经过Exposer中转，再被Prometheus拉取。之所以会产生这种方案，是因为考虑到有历史包袱、复用现有组件、通过MQ（消息队列）来提高扩展性等因素。这个方案会有如下几个问题。
     > 
     > - 增加了查询组件，比如基础的sum、count、average函数都需要额外进行计算。这一方面多了一层依赖，在查询模块连接失败的情况下会多提供一层故障风险；另一方面，很多基本的查询功能的实现都需要消耗资源。而在Prometheus的架构里，上述这些功能都是得到支持的。
     > - 抓取时间可能会不同步，延迟的数据将会被标记为陈旧数据。如果通过添加时间戳来标识数据，就会失去对陈旧数据的处理逻辑。

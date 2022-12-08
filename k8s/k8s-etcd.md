@@ -1,6 +1,6 @@
 # get infos from ETCD
 
-``` bash
+```bash
 $ kubectl describe po -n kube-system etcd-10.110.26.178
 ...
   etcd:
@@ -43,6 +43,7 @@ $ etcdctl --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/et
 # DB size (The displayed size is smaller than the actual size)
 $ etcdctl --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key endpoint status --write-out table
 ```
+
 ## get etcd metrics
 
 ```BASH
@@ -99,7 +100,7 @@ etcd_disk_wal_fsync_duration_seconds_bucket{le="+Inf"} 164575
 etcd_disk_wal_fsync_duration_seconds_sum 2742.7531894699846
 etcd_disk_wal_fsync_duration_seconds_count 164575
 
-# 正常应该大部分在 100ms 以下，即  {le="0.128"} 
+# 正常应该大部分在 100ms 以下，即  {le="0.128"} , <= 0.128s
 $ curl --cert karmada.crt --key karmada.key https://10.151.51.54:2379/metrics -k -s| grep backend_commit_duration_seconds
 # HELP etcd_disk_backend_commit_duration_seconds The latency distributions of commit called by backend.
 # TYPE etcd_disk_backend_commit_duration_seconds histogram
@@ -141,4 +142,35 @@ fsync/fdatasync/sync_file_range:
    | 99.00th=[ 2376], 99.50th=[ 9634], 99.90th=[15795], 99.95th=[15795],
    | 99.99th=[15795]
 ...
+```
+
+fio结果参数说明: https://blog.csdn.net/zsx0728/article/details/122596125
+
+# etcd benchmark
+
+ref: https://www.modb.pro/db/148453
+
+```BASH
+# 获取 benchmark
+$ git clone https://github.com/etcd-io/etcd.git --depth=1
+$ cd etcd
+$ go install -v ./tools/benchmark/ # requires Go 1.19
+$ go1.19 list -f "{{.Target}}" ./tools/benchmark # where is the benchmark
+$ benchmark -h
+
+# 写入测试
+# // leader
+$ benchmark --endpoints="https://etcd-client.kmd-a309ee711c904a618ea0023d9aa0141b-jack00.svc.cluster.local:2379" --target-leader --conns=1 --clients=1 put --key-size=8 --sequential-keys --total=10000 --val-size=256 --cert karmada.crt --key karmada.key --cacert server-ca.crt
+$ benchmark --endpoints="https://etcd-client.kmd-a309ee711c904a618ea0023d9aa0141b-jack00.svc.cluster.local:2379" --target-leader --conns=100 --clients=1000 put --key-size=8 --sequential-keys --total=100000 --val-size=256 --cert karmada.crt --key karmada.key --cacert server-ca.crt
+# // 所有 members  
+# $ benchmark --endpoints="http://100.101.16.71:23791,http://100.101.16.71:23792,http://100.101.16.71:23793" --target-leader --conns=1 --clients=1 put --key-size=8 --sequential-keys --total=10000 --val-size=256
+# $ benchmark --endpoints="http://100.101.16.71:23791,http://100.101.16.71:23792,http://100.101.16.71:23793"  --target-leader --conns=100 --clients=1000 put --key-size=8 --sequential-keys --total=100000 --val-size=256
+
+# 读取测试
+$ benchmark --endpoints="https://etcd-client.kmd-a309ee711c904a618ea0023d9aa0141b-jack00.svc.cluster.local:2379"  --conns=1 --clients=1  range /registry/health --consistency=l --total=10000 --cert karmada.crt --key karmada.key --cacert server-ca.crt
+$ benchmark --endpoints="https://etcd-client.kmd-a309ee711c904a618ea0023d9aa0141b-jack00.svc.cluster.local:2379"  --conns=1 --clients=1  range /registry/health --consistency=s --total=10000 --cert karmada.crt --key karmada.key --cacert server-ca.crt
+# $ benchmark --endpoints="http://192.168.74.36:23791,http://192.168.74.36:23792,http://192.168.74.36:23793"  --conns=100 --clients=1000  range foo --consistency=l --total=100000
+# $ benchmark --endpoints="http://192.168.74.36:23791,http://192.168.74.36:23792,http://192.168.74.36:23793"  --conns=100 --clients=1000  range foo --consistency=s --total=100000
+
+# 
 ```

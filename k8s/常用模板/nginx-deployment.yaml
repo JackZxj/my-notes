@@ -1,19 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx
+  name: nginx-jack
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx
+      app: nginx-jack
   template:
     metadata:
       labels:
-        app: nginx
+        app: nginx-jack
     spec:
       containers:
-      - name: nginx
+      - name: nginx-jack
         image: nginx:alpine
         ports:
         - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-jack
+  labels:
+    app: nginx-jack
+spec:
+  ports:
+    - name: hh
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: nginx-jack
+  type: LoadBalancer

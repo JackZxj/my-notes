@@ -77,7 +77,9 @@ Docker Hub的源拉取困难时，可以添加国内的其他服务商提供的�
 ``` json
 {
     "registry-mirrors": [
-        "https://dockerhub.azk8s.cn",
+        "http://hub-mirror.c.163.com",
+        "https://registry.docker-cn.com",
+        "https://docker.mirrors.ustc.edu.cn",
         "https://reg-mirror.qiniu.com"
     ]
 }

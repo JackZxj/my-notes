@@ -33,6 +33,12 @@ WebAssembly(wasm) 是一种新的编码方式，其编码结果可以产生一�
 
 WebAssembly 是被设计成 JavaScript 的一个完善补充，而不是它的替代品。其想法是在浏览器中安全地运行由C/C++或Rust等语言编译的高性能应用程序。在现代浏览器中，WebAssembly可以与JavaScript并行运行。随着WebAssembly在云中的使用越来越多，它现在是云原生应用程序的通用运行时。与Linux容器相比，WebAssembly运行时以更低的资源消耗实现了更高的性能。
 
+## about wasmedge
+
+WasmEdge，曾用名 SSVM，是一个开源 WebAssembly 虚拟机，由 Second State 发起，其针对边缘设备进行了优化。根据 IEEE Software 杂志上发表的一篇研究论文，WasmEdge 具有先进的 AOT 编译器支持，是当今市场上最快的 runtime 。 (注：该结论来自 https://ieeexplore.ieee.org/document/9214403 , 该文章由 德克萨斯州立大学 与 Second State 的人员共同发布)
+
+其主要由 `C++` 实现。
+
 ## install wasmedge
 
 ```BASH
@@ -424,6 +430,10 @@ $ sudo apt install -y make git gcc build-essential pkgconf libtool \
    libsystemd-dev libprotobuf-c-dev libcap-dev libseccomp-dev libyajl-dev \
    go-md2man libtool autoconf python3 automake
 
+# 安装 wasmedge，会把一些依赖头文件导出到 PATH
+$ curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash
+$ source $HOME/.bashrc
+
 # 编译 crun
 $ git clone https://github.com/containers/crun
 $ cd crun
@@ -431,6 +441,93 @@ $ ./autogen.sh
 $ ./configure --with-wasmedge   # 默认是不带这个参数的，不带这个参数就无法使用 wasmedge
 $ make
 $ sudo make install
+```
+
+centos7.8 上安装 （建议放弃在centos上安装使用新版本 crun，下面的尝试都失败了）
+
+```BASH
+# 安装依赖
+$ install -y make automake \
+    autoconf gettext \
+    libtool gcc libcap-devel systemd-devel libgcrypt-devel \
+    glibc-static libseccomp-devel python36 git
+
+# 安装 wasmedge，会把一些依赖头文件导出到 PATH
+$ curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash
+$ source $HOME/.bashrc
+
+# 安装 yajl (yum安装的版本为老版本，不支持新版本)
+$ wget https://github.com/lloyd/yajl/archive/refs/tags/2.1.0.tar.gz
+$ tar -zxvf 2.1.0.tar.gz
+$ cd yajl-2.1.0
+$ ./configure # 如果报错  cmake: command not found 则 yum install -y cmake
+$ make && make install # 安装
+$ cd ..
+$ ln -sv /usr/local/lib/libyajl.so.2.1.0 /usr/lib64/libyajl.so
+$ ln -sv /usr/local/lib/libyajl.so.2.1.0 /usr/lib64/libyajl.so.2
+$ ln -sv /usr/local/lib/libyajl.so.2.1.0 /usr/lib64/libyajl.so.2.1.0
+$ ln -sv /usr/local/share/pkgconfig/yajl.pc /usr/lib64/pkgconfig/yajl.pc
+
+# 编译 crun
+$ git clone https://github.com/containers/crun
+$ cd crun
+$ ./autogen.sh
+$ export CFLAGS="-g -O2 -std=gnu99" # 设置 gcc flag，默认安装的 gcc 参数不能正常编译
+# 禁用 systemd 还有很多问题。因此不建议禁用
+
+# # $ ./configure --with-wasmedge  --disable-systemd  # centos7.8 的 systemd 不满足，需要关闭。详见：https://github.com/containers/crun/issues/359
+# $ make
+# $ sudo make install
+
+# # 使用 podman 测试 (因为其兼容 docker 命令)
+# $ yum install podman
+# $ podman version
+# Version:            1.6.4
+# RemoteAPI Version:  1
+# Go Version:         go1.12.12
+# OS/Arch:            linux/amd64
+# # 运行一个nginx测试
+# $ podman run -d docker.io/library/nginx:alpine
+# $ podman ps
+# $ podman inspect 744d5faa49f2 | grep OCIRuntime # 744d5faa49f2 是刚刚运行的 nginx 的 CONTAINER ID
+#         "OCIRuntime": "runc",
+# # podman默认运行时为runc，修改配置为crun
+# # 因为编译 crun 时禁用了 systemd , 因此使用 cgroupfs
+# $ vi /usr/share/containers/libpod.conf # 这是老版本的配置，新版本的配置可能在 /usr/share/containers/containers.conf
+# ...
+# # CGroup Manager - valid values are "systemd" and "cgroupfs"
+# cgroup_manager = "cgroupfs"
+# ...
+# # Default OCI runtime
+# runtime = "crun"
+# ...
+# $ podman run -d -p 8080:80 docker.io/library/nginx:alpine # 报错，怀疑是因为内核版本太低不兼容了。。
+# Error: open file `/proc/thread-self/attr/exec`: No such file or directory: OCI runtime command not found error 
+
+# 更新 systemd 版本，跟新版本也不兼容，可能需要更新的版本
+
+# # 1. 禁用SELINUX
+# $ setenforce 0 # 临时禁用
+# $ vi /etc/selinux/config # 永久禁用
+# ...
+# SELINUX=disabled
+# ...
+# # 2. 下载新版本 systemd
+# $ wget https://copr.fedorainfracloud.org/coprs/jsynacek/systemd-backports-for-centos-7/repo/epel-7/jsynacek-systemd-backports-for-centos-7-epel-7.repo -O /etc/yum.repos.d/jsynacek-systemd-centos-7.repo
+# $ yum update systemd
+# $ reboot now
+# $ rpm -q systemd
+
+# # 继续编译crun
+# $ cd crun
+# $ ./autogen.sh
+# $ export CFLAGS="-g -O2 -std=gnu99" # 设置 gcc flag，默认安装的 gcc 参数不能正常编译
+
+# $ ./configure --with-wasmedge
+# ...
+# checking for systemd/sd-bus.h... yes
+# checking for library containing sd_bus_match_signal_async... no
+# configure: error: *** Failed to find libsystemd
 ```
 
 ### crun with other runtime
@@ -453,12 +550,12 @@ ref:
 * with-mono:
   * dotnet 容器的运行时，可以将 dotnet 技术栈的程序打包成镜像用于运行。可以参考官方示例：https://github.com/containers/crun/blob/main/docs/mono-example.md
 * with-wasm* （都是 wasm 的运行时）
-  * wasmer: 
+  * wasmer: （来自 wasmer 独立公司）
     * 可插拔性：与各种编译框架兼容，无论您需要什么（例如：Cranelift、LLVM）
     * 速度/安全性：能够在完全沙盒的环境中以接近本机的速度运行Wasm。（官方宣传比 wasmtime 快）
     * 通用性：适用于任何平台（Windows，Linux等）和芯片组
     * 支持：符合WebAssembly测试套件标准，拥有庞大的开发人员和贡献者社区支持
-  * wasmtime: (目前主要支持 x86 环境)
+  * wasmtime: (目前主要支持 x86 环境，来自 bytecode alliance，其成员包括 aws、google、微软、Intel、ARM 等巨头)
     * 紧凑：要求不高的独立运行时，您可以随着需求的增长而扩展。可以使用小型芯片或与大型服务器一起使用。几乎可嵌入任何应用程序
     * 易于修改：调整Wasmtime以进行预编译，使用Lightbeam生成光速代码，或用于运行时解释。配置您需要 Wasm 完成的任何任务
     * 快速：与 Cranelift 兼容;运行高效
@@ -495,14 +592,14 @@ CMD ["/hello.wasm"]
 
 ```BASH
 # 编译镜像
-$ sudo buildah build --annotation "module.wasm.image/variant=compat" -t mywasm-image .
+$ sudo buildah bud --annotation "module.wasm.image/variant=compat" -t mywasm-image .
 # 推到镜像仓库，authfile 是docker仓库的用户信息
 $ sudo buildah push --authfile ~/.docker/config.json mywasm-image docker://docker.io/myrepo/example-wasi:latest
 # 运行镜像，需要注意 podman 需要切换到 crun 运行时，并且 crun 需要打开 wasm 支持
 $ podman run mywasm-image:latest
 ```
 
-## wasmedge with micro-kernal
+## wasmedge with micro-kernel
 
 ref:
 * [边缘的容器化 — WasmEdge 与 seL4](https://blog.csdn.net/weixin_42376823/article/details/121339850)

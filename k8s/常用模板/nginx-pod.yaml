@@ -5,9 +5,15 @@ metadata:
 spec:
   containers:
   - name: nginx
-    image: 192.168.154.132/library/nginx:alpine
+    image: nginx:alpine
     ports:
     - containerPort: 80
     imagePullSecrets:
     - name: String
-
+    volumeMounts:
+    - mountPath: /mydata
+      name: nginx-data
+  volumes:
+  - name: nginx-data
+    persistentVolumeClaim:
+      claimName: tttttttttttttttttest
