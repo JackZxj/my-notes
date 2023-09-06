@@ -21,3 +21,21 @@ $ rpm -qa | grep vim
 # 通过完整名称就能查到改软件包所有文件的路径了
 $ rpm -ql vim-common-7.4.629-8.el7_9.x86_64
 ```
+
+## pprof
+
+```BASH
+# sudo apt install graphviz
+# sudo yum install graphviz
+# brew install graphviz
+$ curl http://127.0.0.1:6060/debug/pprof/heap -o heap.pprof
+$ go tool pprof -http :8080 heap.pprof
+$ go tool pprof -http :8080 "http://127.0.0.1:6060/debug/pprof/heap"
+```
+
+## kubectl run
+
+```BASH
+$ kubectl run -i --tty load-generator1 --rm --image=busybox:1.28 --restart=Never --overrides='{"apiVersion": "v1", "spec": {"tolerations": [{"effect": "NoSchedule","key": "dedicated","value": "special-user"}]}}' -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+
+```

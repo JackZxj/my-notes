@@ -41,6 +41,12 @@ git reset --mixed HEAD~2 # 取消前两次 commit 且取消暂存，reset 的默
 git reset --hard <commit_id> # 回退到某一次 commit 并且清除所有改动
 git reset --hard <origin/originBranch> # 回退到和远程一样并且清除所有改动
 
+# rebase 压缩提交
+git rebase -i HEAD~3  # 基于提交次数进行rebase，表示对HEAD之前的3次提交进行rebase操作
+git rebase -i <commit_id>  # 基于 commit id 进行rebase，可操作的commit不包括此id
+git rebase -i origin/master # 基于branch或者标签进行rebase
+# 运行上述命令后会使用编辑器提示需要合并或者压缩的列表，使用 p(pick) 表示保留commit，使用 s(squash) 表示压缩该条记录，完成后提交新的 commit 记录
+
 # 查看本地所有分支的最后 commit 时间
 git for-each-ref --sort='-committerdate:iso8601' --format=' %(committerdate:iso8601)%09%(refname)' refs/heads
 # 如果需要看某个远程分支，运行 git fetch <orginName> 后
@@ -76,3 +82,56 @@ E[git operation ]
 * refactor：重构（即不是新增功能，也不是修改bug的代码变动）
 * test：增加测试
 * chore：构建过程或辅助工具的变动
+
+### changelog from commit
+
+Makefile:
+
+``` Makefile
+.PHONY: changelog changelog-docker
+EXECUTABLES = node npm conventional-changelog
+changelog:
+	$(foreach exec,$(EXECUTABLES),\
+		$(if $(shell which $(exec)), ,$(error "$(exec) not in PATH, requires: nodejs >= 16.0, npm>=8.0, then: npm install -g conventional-changelog-cli")))
+	npm run changelog
+
+changelog-docker:
+	docker run -it -v .:/project -e GOPATH=NO_USE --rm --entrypoint bash node:bullseye -c "npm install -g conventional-changelog-cli ; cd /project ; make changelog"
+```
+
+package.json:
+
+```json
+{
+  "name": "Your app name",
+  "version": "Your app version",
+  "description": "Some texts.....",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xxx/yyy.git"
+  },
+  "scripts": {
+    "changelog": "conventional-changelog -p angular -n './changelog-config.js' -i CHANGELOG.md -s"
+  }
+}
+```
+
+[changelog-config.js](./changelog-config.js)
+
+example result:
+
+``` markdown
+# [1.1.0](https://github.com/xxx/yyy/compare/1.0.0...1.1.0) (2023-09-06)
+
+
+### 🌟 Features | 新增功能
+
+* add some logs ([fb18b7e](https://github.com/xxx/yyy/commits/fb18b7e03c41775dff871e931bfa39808afd3d91))  , by [xiaoming](mailto:xiaoming@mail.com)
+
+
+### 🐛 Bug Fixes | 修复 bug
+
+* fix some bugs ([1e9ad54](https://github.com/xxx/yyy/commits/1e9ad54db1861d01bd354210b459cf88dbaef47a))  , by [xiaozhang](mailto:xiaozhang@mail.com)
+
+
+```

@@ -108,6 +108,18 @@ curl https://192.168.137.115:6443/apis/devices.kubeedge.io/v1alpha1/namespaces/d
 curl -v -X PUT https://192.168.137.115:6443/apis/devices.kubeedge.io/v1alpha1/namespaces/default/devices/rgb-light-device --header "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"apiVersion":"devices.kubeedge.io/v1alpha1","kind":"Device","metadata":{"annotations":{"kubectl.kubernetes.io/last-applied-configuration":"{\"apiVersion\":\"devices.kubeedge.io/v1alpha1\",\"kind\":\"Device\",\"metadata\":{\"annotations\":{},\"labels\":{\"description\":\"rgb-light-device\"},\"name\":\"rgb-light-device\",\"namespace\":\"default\"},\"spec\":{\"deviceModelRef\":{\"name\":\"rgb-light\"},\"nodeSelector\":{\"nodeSelectorTerms\":[{\"matchExpressions\":[{\"key\":\"kubernetes.io/hostname\",\"operator\":\"In\",\"values\":[\"edge-zero02\"]}]}]}},\"status\":{\"twins\":[{\"desired\":{\"metadata\":{\"type\":\"int\"},\"value\":\"50\"},\"propertyName\":\"red-pwm\"},{\"desired\":{\"metadata\":{\"type\":\"int\"},\"value\":\"50\"},\"propertyName\":\"green-pwm\"},{\"desired\":{\"metadata\":{\"type\":\"int\"},\"value\":\"50\"},\"propertyName\":\"blue-pwm\"}]}}\n"},"creationTimestamp":"2020-08-27T13:51:34Z","generation":10,"labels":{"description":"rgb-light-device"},"name":"rgb-light-device","namespace":"default","resourceVersion":"3629361","selfLink":"/apis/devices.kubeedge.io/v1alpha1/namespaces/default/devices/rgb-light-device","uid":"f68d87df-15a0-4547-8e06-cb732c7d956f"},"spec":{"deviceModelRef":{"name":"rgb-light"},"nodeSelector":{"nodeSelectorTerms":[{"matchExpressions":[{"key":"kubernetes.io/hostname","operator":"In","values":["edge-zero02"]}]}]}},"status":{"twins":[{"desired":{"metadata":{"type":"int"},"value":"20"},"propertyName":"red-pwm"},{"desired":{"metadata":{"type":"int"},"value":"0"},"propertyName":"green-pwm"},{"desired":{"metadata":{"type":"int"},"value":"10"},"propertyName":"blue-pwm"}]}}' --insecure 
 ```
 
+## With Kubeconfig
+
+```BASH
+grep client-certificate-data ~/.kube/config | cut -d " " -f 6 | base64 -d > tmp/client.pem
+grep client-key-data ~/.kube/config | cut -d " " -f 6 | base64 -d > tmp/client-key.pem
+grep certificate-authority-data ~/.kube/config | cut -d " " -f 6 | base64 -d > tmp/ca.pem
+# with ca
+curl --cert tmp/client.pem --key tmp/client-key.pem --cacert tmp/ca.pem https://your-ip:6443/api/v1/nodes
+# without ca
+curl --cert tmp/client.pem --key tmp/client-key.pem -k https://your-ip:6443/api/v1/nodes
+```
+
 ----------------
 Useless
 

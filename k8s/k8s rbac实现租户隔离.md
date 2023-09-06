@@ -1,5 +1,7 @@
 # k8s rbac实现租户隔离
 
+关于k8s认证鉴权: https://www.bbsmax.com/A/A7zgQxyV54/
+
 ## Role 和 ClusterRole
 
 * Role 用于限制一个 namespace 下的资源, 使用 RoleBinding 绑定 User/Group/ServiceAccount
@@ -80,6 +82,10 @@ nginx   1/1     Running   0          44m
 $ ssh 192.168.122.242 "kubectl get po -n default"
 Error from server (Forbidden): pods is forbidden: User "jack" cannot list resource "pods" in API group "" in the namespace "default"
 ```
+
+### 通过 CertificateSigningRequest (CSR) 创建 User
+
+ref: https://www.oomspot.com/post/ianzhinanzuijiashijianliyongcsrapichuangjianyonghu
 
 ## 基于 ClusterRole
 

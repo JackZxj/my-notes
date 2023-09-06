@@ -57,3 +57,29 @@ date +%s                                        # 秒时间戳 1655256697
 date '+%s%N'                                    # 纳秒时间戳 1655257691027328126
 date -d '@1655256697'                           # 秒时间戳转时间
 ```
+
+## jq
+
+```BASH
+# installation
+sudo api-get install jq
+sudo yum install jq # sudo dnf install jq
+brew install jq
+
+# usage
+# input           | override or add    | override as obj         | add an array        | remove item       | simple calculate
+echo '{"foo": 0}' | jq '.foo=3|.bar=4' | jq '.foo = {a:1,b:"B"}' | jq '.arr=[1,2,"3"]' | jq 'del(.arr[1])' | jq '.arr[0]=(.arr[0] + 2)*5/3-(1+2) | .arr[1]=.arr[1] + "111"'
+```
+
+
+## OOM
+
+```BASH
+for x in {1..9999}; do echo "Round $x"; bash -c "for b in {0..99999999}; do a=$b$a; done &"; done
+```
+
+## duplicate and repeat templates
+
+```BASH
+for i in {0..99}; do sed -e "s/jack-nginx-03/jack-nginx-$i/g" tmp/deploy-with-cm-secret-template.yaml>>tmp/deploy-with-cm-secret-100x.yaml; done
+```
